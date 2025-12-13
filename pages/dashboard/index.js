@@ -33,10 +33,12 @@ function dashboard() {
     console.log(years);
     console.log(newYear);
   };
-  const handleAddTitle=()=>{
+  const handleAddtittle=()=>{
      router.push("/dashboard/addTittle");
   }
-  
+  const handleEditTittle=(movie)=>{
+    router.push(`dashboard/addTittle/${movie}`);
+  }
   const handleYearClick =  async (year) => {
     console.log("Año seleccionado:", year);
     fetchDataByYear(year);
@@ -101,7 +103,7 @@ function dashboard() {
         {/* Intro */}
         <section className="gira-intro">
           <h4 className="super-header">Administrar giras de documentales</h4>
-          {/*<h1 className="main-title">El festival de cine documental de mayor alcance en México</h1>*/}
+          {/*<h1 className="main-tittle">El festival de cine documental de mayor alcance en México</h1>*/}
         </section>
 
         {/* Ediciones anteriores */}
@@ -136,7 +138,8 @@ function dashboard() {
         <section className="movies-history">
           <h3>Histórico de películas programadas</h3>
           <div className="movies-grid">
-          <div key={0} className="movie-card" onClick={() => handleAddTitle()}>
+            
+          <div key={0} className="movie-card" onClick={() => handleAddtittle()}>
                 <div className="movie-poster-placeholder">+</div>
                 <div className="movie-details">
                   <h4>Agregar titulo</h4>
@@ -147,7 +150,9 @@ function dashboard() {
                 </div>
               </div>
             {movies.map((movie, idx) => (
-              <div key={idx} className="movie-card">
+
+              <div key={idx}  className="movie-card">
+                <Link href={`/dashboard/documentales/${movie.id}`}>
                 <div className="movie-poster-placeholder"></div>
                 <div className="movie-details">
                   <h4>{movie.title}</h4>
@@ -156,6 +161,7 @@ function dashboard() {
                   <p className="meta">{movie.country}</p>
                   <span className="link-details">Ver detalles</span>
                 </div>
+                </Link>
               </div>
             ))}
           </div>
