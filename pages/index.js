@@ -35,7 +35,7 @@ export default function GiraPage() {
       })
       .then(data => {
         console.log("Parsed data:", data);
-        setMovies(data);
+        setMovies(data.movies);
       })
       .catch(err => console.error("Fetch error:", err));
   }, []);
