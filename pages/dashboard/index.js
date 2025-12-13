@@ -1,15 +1,42 @@
 "use client"
+import { useRouter } from "next/router";
+import withRole from '@/utils/withRole';
 import Head from 'next/head';
 import Link from 'next/link';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 import { useEffect, useState } from "react";
 
-export default function GiraPage() {
-  const years = Array.from({ length: 12 }, (_, i) => 2025 - i); 
+function dashboard() {
+    const router = useRouter();
+  //const years = Array.from({ length: 12 }, (_, i) => 2025 - i); 
   const [movies, setMovies] = useState([]);
- // const [years, setYears] = useState([]);
+  let [years,setYears]=useState([]);
+  const handleadd = () => {
+
+    const newYear = prompt("Ingrese el año");
+  
+    if (!newYear) return;
+  
+    if (!/^\d{4}$/.test(newYear)) {
+      alert("Año inválido");
+      return;
+    }
+  
+    // Verificar si ya existe
+    if (years.includes(newYear)) {
+      alert("Ese año ya existe");
+      return;
+    }
+    setYears([...years, newYear]);
+    console.log(years);
+    console.log(newYear);
+  };
+  const handleAddTitle=()=>{
+     router.push("/dashboard/addTittle");
+  }
+  
   const handleYearClick =  async (year) => {
     console.log("Año seleccionado:", year);
     fetchDataByYear(year);
@@ -17,11 +44,26 @@ export default function GiraPage() {
   const fetchDataByYear = async (year) => {
     try {
       const res = await fetch(`/api/getDocumentals?year=${year}`);
-      const data = await res.json();
+      const data = await res.json()
+    
+      if(!data.movies || data.movies.length === 0){
+        setMovies([]);
+        setYears([...years]);
+        return;
+      }
+      
       console.log("Datos recibidos:", data);
       setMovies(data.movies);
-      setYears(data.avaiableYears);
-      console.log(data.years);
+      if(years.length===0){
+      setYears(data.availableYears);
+    }
+    else{
+        setYears([...years])
+    }
+    
+     
+      
+      
     } catch (error) {
       console.log("Error al obtener datos:", error);
     }
@@ -34,8 +76,9 @@ export default function GiraPage() {
         return res.json();
       })
       .then(data => {
-        console.log("Parsed data:", data);
+        console.log("Parsed data:", data.movies);
         setMovies(data.movies);
+        setYears(data.availableYears);
       })
       .catch(err => console.error("Fetch error:", err));
   }, []);
@@ -45,11 +88,7 @@ export default function GiraPage() {
 
   return (
     <div className="page-wrapper">
-      <Head>
-        <title>Gira - Ambulante</title>
-      </Head>
-
-      <Header />
+     
 
       <main className="main-content">
         {/* Breadcrumb */}
@@ -61,23 +100,22 @@ export default function GiraPage() {
 
         {/* Intro */}
         <section className="gira-intro">
-          <h4 className="super-header">Ambulante Gira de Documentales</h4>
-          <h1 className="main-title">El festival de cine documental de mayor alcance en México</h1>
-          
-          <div className="intro-text-columns">
-            <p>
-              La Gira es nuestro proyecto más icónico [...]
-            </p>
-            <p>
-              A lo largo de veinte años [...]
-            </p>
-          </div>
+          <h4 className="super-header">Administrar giras de documentales</h4>
+          {/*<h1 className="main-title">El festival de cine documental de mayor alcance en México</h1>*/}
         </section>
 
         {/* Ediciones anteriores */}
         <section className="editions-list">
           <h3>Ediciones anteriores</h3>
           <div className="years-grid">
+          <div
+                key="agregar"
+                className="year-card"
+                onClick={() => handleadd()}
+              >
+                <span>Agregar año</span>
+                <span className="arrow-icon">↗</span>
+              </div>
             {years.map((year) => (
               <div
                 key={year}
@@ -92,31 +130,28 @@ export default function GiraPage() {
         </section>
 
 
-        {/* Edición actual */}
-        <section className="current-edition">
-          <div className="edition-info">
-            <h2>20ª edición</h2>
-            <p className="dates">Del 2 de abril al 15 de junio [...]</p>
-            <p className="edition-desc">
-              Oleajes se presenta como un concepto [...]
-            </p>
-            <div className="action-buttons">
-              <button className="btn-transparent">Descargar programas</button>
-              <button className="btn-transparent">Ver catálogo de películas</button>
-            </div>
-          </div>
-        </section>
+       
 
         {/* Histórico de películas */}
         <section className="movies-history">
           <h3>Histórico de películas programadas</h3>
           <div className="movies-grid">
+          <div key={0} className="movie-card" onClick={() => handleAddTitle()}>
+                <div className="movie-poster-placeholder">+</div>
+                <div className="movie-details">
+                  <h4>Agregar titulo</h4>
+                  <p className="director">"agregar director"</p>
+                  <p className="meta">agregar año</p>
+                  <p className="meta">agregar cidudad</p>
+                  <span className="link-details">Ver detalles</span>
+                </div>
+              </div>
             {movies.map((movie, idx) => (
               <div key={idx} className="movie-card">
                 <div className="movie-poster-placeholder"></div>
                 <div className="movie-details">
                   <h4>{movie.title}</h4>
-                  <p className="director">{movie.director}</p>
+                  <p className="director">{movie.Director}</p>
                   <p className="meta">{movie.year}</p>
                   <p className="meta">{movie.country}</p>
                   <span className="link-details">Ver detalles</span>
@@ -135,3 +170,4 @@ export default function GiraPage() {
     </div>
   );
 }
+export default withRole(dashboard, ["admin_documentales"]);
