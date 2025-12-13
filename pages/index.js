@@ -19,7 +19,7 @@ export default function GiraPage() {
       const res = await fetch(`/api/getDocumentals?year=${year}`);
       const data = await res.json();
       console.log("Datos recibidos:", data);
-      setMovies(data.rows);
+      setMovies(data.movies);
       setYears(data.avaiableYears);
       console.log(data.years);
     } catch (error) {
