@@ -33,6 +33,7 @@ export default function Header() {
             ))}
           </ul>
         </nav>
+        <Link href="/logIn">Iniciar sesión</Link>
 
         {/* Idioma */}
         <div className="language-selector">
