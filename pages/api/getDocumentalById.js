@@ -6,18 +6,7 @@ export default async function handler(req, res) {
 
   const [rows] = await conn.execute(
     `
-    SELECT 
-      d.idDoc,
-      d.doc_title AS title,
-      d.doc_year AS year,
-      dr.dir_name AS director,
-      c.coun_name AS country,
-      dd.dd_presentationDate AS presentationDate
-    FROM documental d
-    JOIN director dr ON d.idDirector = dr.idDirector
-    JOIN country c ON d.idCountry = c.idCountry
-    LEFT JOIN dateDocumental dd ON d.idDoc = dd.idDocumental
-    WHERE d.idDoc = ?
+    SELECT * FROM vw_DetallePelicula WHERE id= ?;
     `,
     [id]
   );
@@ -25,19 +14,22 @@ export default async function handler(req, res) {
   if (rows.length === 0) {
     return res.status(404).json(null);
   }
-  console.log("nueva consulta")
-  console.log(rows);
+
  
   // Agrupar fechas
   const documental = {
-    idDoc: rows[0].idDoc,
-    title: rows[0].title,
-    year: rows[0].year,
+    id: rows[0].id,
+    titulo: rows[0].titulo,
+    anio_publicacion: rows[0].anio_publicacion,
     director: rows[0].director,
-    country: rows[0].country,
-    dates: rows
-      .map(r => r.presentationDate)
-      .filter(Boolean)
+    sinopsis: rows[0].sinopsis,
+    url_image: rows[0].sinopsis,
+    iniciativa: rows[0].iniativa,
+    url_descarga:  rows[0].url_descarga,
+    edicion_presentada: rows[0].edicion_presentada,
+    idiomas: rows[0].idiomas,
+    tematicas: rows[0].tematicas,
+    premios_ganados: rows[0].premios_ganados
   };
 
   res.status(200).json(documental);

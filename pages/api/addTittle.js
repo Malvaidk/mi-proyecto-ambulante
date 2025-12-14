@@ -1,82 +1,78 @@
-import { getConnection } from "../../lib/connection";
+import { getConnection } from "@/lib/connectionAdmin";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Método no permitido" });
-  }
-
-  const { title, year, director, country, presentationDate } = req.body;
-
-  if (!title || !year || !director || !country || !presentationDate) {
-    return res.status(400).json({ message: "Datos incompletos" });
-  }
-
-  const conn = await getConnection();
-
   try {
-    await conn.beginTransaction();
-
-    // ================= DIRECTOR =================
-    const [dirRows] = await conn.execute(
-      "SELECT idDirector FROM director WHERE dir_name = ?",
-      [director]
-    );
-
-    let directorId;
-    if (dirRows.length > 0) {
-      directorId = dirRows[0].idDirector;
-    } else {
-      const [dirResult] = await conn.execute(
-        "INSERT INTO director (dir_name) VALUES (?)",
-        [director]
-      );
-      directorId = dirResult.insertId;
+    const conn = await getConnection();
+    const { pelicula, idiomas, tematicas, premios, participantes } = req.body;
+    console.log(req.body);
+    if (!pelicula) {
+      return res.status(400).json({ message: "Datos de película incompletos" });
     }
 
-    // ================= COUNTRY =================
-    const [countryRows] = await conn.execute(
-      "SELECT idCountry FROM country WHERE coun_name = ?",
-      [country]
+    // 🧠 Generar ID
+    const [[{ nextId }]] = await conn.query(
+      "SELECT IFNULL(MAX(idPelicula),0)+1 AS nextId FROM peliculas"
     );
 
-    let countryId;
-    if (countryRows.length > 0) {
-      countryId = countryRows[0].idCountry;
-    } else {
-      const [countryResult] = await conn.execute(
-        "INSERT INTO country (coun_name) VALUES (?)",
-        [country]
-      );
-      countryId = countryResult.insertId;
+    const idPelicula = nextId;
+
+    // 1️⃣ Película
+    await conn.query(
+      "CALL sp_agregar_pelicula_completa(?,?,?,?,?,?,?,?,?,?)",
+      [
+        idPelicula,
+        pelicula.titulo,
+        Number(pelicula.duracion),
+        Number(pelicula.anioPub),
+        pelicula.sinopsis,
+        pelicula.imagen,
+        pelicula.iniciativa,
+        pelicula.descarga,
+        Number(pelicula.idEdicion),
+        pelicula.director
+      ]
+    );
+
+    
+    for (const idIdioma of idiomas || []) {
+      await conn.query("CALL sp_agregar_idioma_pelicula(?,?)", [
+        idPelicula,
+        idIdioma
+      ]);
     }
 
-    // ================= DOCUMENTAL =================
-    const [docResult] = await conn.execute(
-      `INSERT INTO documental 
-       (doc_title, doc_year, idDirector, idCountry)
-       VALUES (?, ?, ?, ?)`,
-      [title, year, directorId, countryId]
-    );
+    
+    for (const idTematica of tematicas || []) {
+      await conn.query("CALL sp_agregar_tematica_pelicula(?,?)", [
+        idPelicula,
+        idTematica
+      ]);
+    }
 
-    const documentalId = docResult.insertId;
+  
+    for (const idPremio of premios || []) {
+      await conn.query("CALL sp_agregar_premio_pelicula(?,?)", [
+        idPelicula,
+        idPremio
+      ]);
+    }
 
-    // ================= DATE DOCUMENTAL =================
-    await conn.execute(
-      `INSERT INTO dateDocumental 
-       (idDocumental, dd_presentationDate)
-       VALUES (?, ?)`,
-      [documentalId, presentationDate]
-    );
-
-    await conn.commit();
+  
+    for (const p of participantes || []) {
+      await conn.query("CALL sp_agregar_participante_pelicula(?,?,?)", [
+        idPelicula,
+        p.curp,
+        p.rol
+      ]);
+    }
 
     res.status(200).json({
-      message: "Documental y fecha de presentación agregados correctamente"
+      message: "Película registrada correctamente",
+      idPelicula
     });
 
   } catch (error) {
-    await conn.rollback();
-    console.error("ERROR:", error);
-    res.status(500).json({ message: "Error al guardar el documental" });
+    console.error(error);
+    res.status(500).json({ message: "Error al registrar película", error });
   }
 }

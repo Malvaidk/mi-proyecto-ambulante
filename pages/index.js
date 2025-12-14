@@ -113,14 +113,16 @@ export default function GiraPage() {
           <div className="movies-grid">
             {movies.map((movie, idx) => (
               <div key={idx} className="movie-card">
+                 <Link href={`/masInformacion/${movie.idPelicula }`}>
                 <div className="movie-poster-placeholder"></div>
                 <div className="movie-details">
-                  <h4>{movie.title}</h4>
+                  <h4>{movie.titulo}</h4>
                   <p className="director">{movie.director}</p>
-                  <p className="meta">{movie.year}</p>
+                  <p className="meta">{movie.anioPub}</p>
                   <p className="meta">{movie.country}</p>
                   <span className="link-details">Ver detalles</span>
                 </div>
+                </Link>
               </div>
             ))}
           </div>
