@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Testimonial from '../components/Testimonial'; // 1. IMPORTAMOS EL COMPONENTE
 import { useEffect, useState } from "react";
 
 export default function GiraPage() {
@@ -52,7 +53,6 @@ export default function GiraPage() {
           </div>
 
           <div className="hero-image-container">
-             {/* CAMBIA ESTO POR TU IMAGEN REAL */}
              <img src="https://i.postimg.cc/tCsRTPB8/ambulante1.png" alt="Ambulante Hero" className="hero-img" />
           </div>
         </section>
@@ -80,7 +80,7 @@ export default function GiraPage() {
              Del 2 de abril al 18 de junio | Ciudad de México, Baja California, Veracruz y Yucatán
           </p>
           <p style={{ color: '#666', maxWidth: '800px', marginBottom: '30px' }}>
-            Festeja con nosotros veinte años de viajar...
+          Oleajes se presenta como un concepto que nos permite explorar tanto las fuerzas dinámicas que han moldeado al cine documental durante las últimas dos décadas, como las corrientes actuales que impulsan su futuro. Los oleajes nos invitan a sentir el vaivén entre lo viejo y lo nuevo a través de los movimientos colectivos, las genealogías y las historias que se tejen a través del tiempo.
           </p>
 
           <div style={{ display: 'flex', gap: '15px' }}>
@@ -94,7 +94,6 @@ export default function GiraPage() {
           <div className="edition-grid">
              {/* Item Izquierdo: Poster */}
              <div className="poster-card">
-                {/* Pon aquí tu imagen del poster de la ola */}
                 <img src="https://i.postimg.cc/KzTVwGfL/image.webp" alt="Poster" className="poster-img" /> 
                 <h3 className="poster-title">Materiales</h3>
              </div>
@@ -127,7 +126,7 @@ export default function GiraPage() {
           </div>
         </section>
 
-        {/* --- SECCIÓN 4: HISTÓRICO DE PELÍCULAS (MOSAICO DINÁMICO) --- */}
+        {/* --- SECCIÓN 4: HISTÓRICO DE PELÍCULAS --- */}
         <section className="history-section">
           <div className="container">
             <h2 style={{ marginBottom: '30px', fontSize: '1.8rem' }}>Histórico de películas programadas</h2>
@@ -138,10 +137,8 @@ export default function GiraPage() {
                   <Link 
                     href={`/masInformacion/${movie.idPelicula}`} 
                     key={movie.idPelicula || idx}
-                    /* Lógica: El primer elemento (idx 0) obtiene la clase 'featured' para ser grande */
                     className={`movie-card ${idx === 0 ? 'featured' : ''}`}
                   >
-                      {/* Placeholder de imagen. Reemplaza src con movie.posterUrl si tu API lo tiene */}
                       <img 
                         src={movie.imagen || "/images/placeholder-movie.jpg"} 
                         alt={movie.titulo} 
@@ -164,7 +161,6 @@ export default function GiraPage() {
                 <p>Cargando o no hay películas...</p>
               )}
               
-              {/* Rellenar espacios vacíos si hay menos de 5 películas para mantener el grid ordenado*/}
               {movies?.length > 0 && movies.length < 5 && Array.from({length: 5 - movies.length}).map((_, i) => (
                  <div key={i} className="movie-card" style={{background: '#ddd'}}></div>
               ))}
@@ -176,6 +172,9 @@ export default function GiraPage() {
           </div>
         </section>
 
+        {/* --- SECCIÓN 5: TESTIMONIOS --- */}
+        <Testimonial />
+              
       </main>
       <Footer />
     </div>
