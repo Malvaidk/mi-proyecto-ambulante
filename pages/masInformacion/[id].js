@@ -2,9 +2,13 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import withRole from "@/utils/withRole";
+import Link from "next/link";
+// import withRole from "@/utils/withRole"; <-- ELIMINADO
+import Header from "../../components/Header"; 
+import Footer from "../../components/Footer"; 
+import { PlayCircle } from 'lucide-react'; 
 
-function DocumentalPage() {
+export default function DocumentalPage() { // Ahora exportamos directamente la función
   const router = useRouter();
   const { id } = router.query;
 
@@ -17,27 +21,16 @@ function DocumentalPage() {
     fetch(`/api/getDocumentalById?id=${id}`)
       .then(res => res.json())
       .then(data => {
-        setDocumental({
-          id,
-          titulo: data.titulo,
-          duracion: data.duracion,
-          anio_publicacion: data.anio_publicacion,
-          director: data.director,
-          sinopsis: data.sinopsis, 
-          url_imagen: data.url_imagen,
-          iniciativa: data.iniciativa,
-          url_descarga: data.url_descarga,
-          edicion_presentada: data.edicion_presentada,
-          idiomas: data.idiomas,
-          tematicas: data.tematicas,
-          premios_ganados: data.premios_ganados,
-          duracion:data.duracion
-        });
+        setDocumental(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
         setLoading(false);
       });
   }, [id]);
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading) return <div style={{height: '100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>Cargando...</div>;
   if (!documental) return <p>No encontrado</p>;
 
   return (
@@ -46,77 +39,141 @@ function DocumentalPage() {
         <title>{documental.titulo} | Ambulante</title>
       </Head>
 
-      <main className="documental-page">
-        {/* VOLVER */}
-        <section className="documental-actions">
-          <button onClick={() => router.push("/")}>
-            ← Volver al dashboard
-          </button>
-        </section>
+      <Header />
 
-        {/* HERO */}
-        <section className="documental-hero">
-          <img
-            src={documental.url_imagen}
-            alt={documental.titulo}
-            className="documental-poster"
-          />
-
-          <div className="documental-hero-info">
-            <span className="initiative">{documental.iniciativa}</span>
-            <h1>{documental.titulo}</h1>
-
-            <p className="meta">
-              {documental.anio_publicacion} · {documental.duracion} min
-            </p>
-
-            <p className="director">
-              Dir. {documental.director}
-            </p>
-
-            <a
-              href={documental.url_descarga}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary"
-            >
-              Ver / Descargar
-            </a>
+      <main style={{ paddingTop: '100px', backgroundColor: 'white' }}>
+        
+        <div className="movie-container">
+          
+          {/* 1. BREADCRUMBS */}
+          <div className="breadcrumbs">
+            {/* Cambié el link de "dashboard" a "programacion" o la lista pública para que tenga sentido */}
+            <Link href="/programa">← Atrás</Link>
+            <span>/</span>
+            <Link href="/">Inicio</Link>
+            <span>/</span>
+            <span>Películas</span>
           </div>
-        </section>
 
-        {/* SINOPSIS */}
-        <section className="documental-section">
-          <h2>Sinopsis</h2>
-          <p>{documental.sinopsis}</p>
-        </section>
+          {/* 2. TÍTULO */}
+          <h1 className="movie-title">{documental.titulo}</h1>
 
-        {/* FICHA TÉCNICA */}
-        <section className="documental-section">
-          <h2>Ficha técnica</h2>
-          <ul className="ficha-tecnica">
-            <li><strong>Año:</strong> {documental.anio_publicacion}</li>
-            <li><strong>Duración:</strong> {documental.duracion} minutos</li>
-            <li><strong>Director:</strong> {documental.director}</li>
-            <li><strong>Idiomas:</strong> {documental.idiomas}</li>
-            <li><strong>Edición presentada:</strong> {documental.edicion_presentada}</li>
-          </ul>
-        </section>
+          {/* 3. HERO IMAGE */}
+          <div className="movie-hero-container">
+            <img
+              src={documental.url_imagen || "/images/placeholder-wide.jpg"}
+              alt={documental.titulo}
+              className="movie-hero-img"
+            />
+          </div>
+          
+          <div className="trailer-btn-row">
+            <PlayCircle size={18} />
+            <span>Ver Tráiler</span>
+          </div>
 
-        {/* TEMÁTICAS */}
-        <section className="documental-section">
-          <h2>Temáticas</h2>
-          <p>{documental.tematicas}</p>
-        </section>
+          {/* 4. GRID DE CONTENIDO (3 COLUMNAS) */}
+          <div className="movie-content-grid">
+            
+            {/* --- COLUMNA IZQUIERDA: SPECS --- */}
+            <aside>
+              <div style={{ marginBottom: '20px' }}>
+                <span className="label-small">DIRECCIÓN</span>
+                <span className="value-text">{documental.director}</span>
+              </div>
 
-        {/* PREMIOS */}
-        <section className="documental-section">
-          <h2>Premios y festivales</h2>
-          <p>{documental.premios_ganados}</p>
-        </section>
+              {/* Caja Gris */}
+              <div className="specs-box">
+                <div className="specs-item">
+                  <span className="label-small">DURACIÓN</span>
+                  <span className="value-text" style={{marginBottom:0}}>{documental.duracion} min</span>
+                </div>
+
+                <div className="specs-item" style={{ marginTop: '20px' }}>
+                   <span className="label-small">PAÍSES</span>
+                   <span className="value-text" style={{marginBottom:0}}>México</span>
+                </div>
+
+                <div className="specs-item" style={{ marginTop: '20px' }}>
+                   <span className="label-small">AÑO</span>
+                   <span className="value-text" style={{marginBottom:0}}>{documental.anio_publicacion}</span>
+                </div>
+
+                <div className="specs-item" style={{ marginTop: '20px' }}>
+                   <span className="label-small">IDIOMAS</span>
+                   <span className="value-text" style={{marginBottom:0}}>{documental.idiomas}</span>
+                </div>
+              </div>
+            </aside>
+
+            {/* --- COLUMNA CENTRAL: INFO --- */}
+            <section>
+              <h2 className="section-header">Sinopsis</h2>
+              <p className="body-text">{documental.sinopsis}</p>
+
+              {documental.semblanza && (
+                <>
+                  <h2 className="section-header">Semblanza</h2>
+                  <p className="body-text">{documental.semblanza}</p>
+                </>
+              )}
+
+              <h2 className="section-header">Festivales y Premios</h2>
+              <div className="laurels-container">
+                 {documental.premios_ganados ? (
+                    <p>{documental.premios_ganados}</p>
+                 ) : (
+                    <span>Selección Oficial Ambulante 2025</span>
+                 )}
+                 <div style={{ width: '100%', height: '1px', backgroundColor: '#eee', marginTop:'20px'}}></div>
+              </div>
+            </section>
+
+            {/* --- COLUMNA DERECHA: META --- */}
+            <aside>
+              <div style={{ marginBottom: '40px' }}>
+                 <span className="label-small">TEMÁTICAS</span>
+                 <span className="meta-tag">
+                    {documental.tematicas || "Documental"}
+                 </span>
+              </div>
+
+              <div style={{ marginBottom: '40px' }}>
+                 <span className="label-small">INICIATIVAS</span>
+                 <div className="iniciativa-row">
+                    <span className="red-dot"></span>
+                    <span>{documental.iniciativa || "Gira Ambulante"}</span>
+                 </div>
+              </div>
+
+              <div>
+                 <span className="label-small">DESCARGAS</span>
+                 {documental.url_descarga ? (
+                   <a href={documental.url_descarga} target="_blank" className="download-link">
+                     Ver / Descargar Stills
+                   </a>
+                 ) : (
+                   <span style={{color:'#999', fontSize:'0.9rem'}}>No disponible</span>
+                 )}
+              </div>
+            </aside>
+
+          </div>
+
+          {/* 5. BARRA DE CRÉDITOS */}
+          <div className="credits-bar">
+             Mostrar Créditos ⌄
+          </div>
+
+          {/* 6. RELACIONADO */}
+          <div style={{ padding: '60px 0', textAlign: 'center' }}>
+             <h2 style={{ fontSize: '2rem', marginBottom: '30px' }}>Contenido relacionado</h2>
+          </div>
+
+        </div>
       </main>
+
+      <Footer />
     </>
   );
 }
-
-export default withRole(DocumentalPage, ["admin_documentales"]);

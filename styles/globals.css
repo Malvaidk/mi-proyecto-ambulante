@@ -632,3 +632,197 @@ body {
   border: 1px solid #fadbd8;
 }
 
+/* --- DISEÑO DE PELÍCULA (ESTILO "APOLONIA") --- */
+
+/* Contenedor principal limitado y centrado */
+.movie-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  font-family: var(--font-main);
+  color: var(--color-black);
+}
+
+/* Breadcrumbs (Navegación superior) */
+.breadcrumbs {
+  font-size: 0.75rem;
+  color: #666;
+  margin: 20px 0 40px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.breadcrumbs a {
+  text-decoration: none;
+  color: inherit;
+  font-weight: bold;
+}
+.breadcrumbs span {
+  color: #999;
+}
+
+/* Título Principal */
+.movie-title {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 30px;
+  color: black;
+  letter-spacing: -1px;
+}
+
+/* Hero Image (Imagen ancha) */
+.movie-hero-container {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 21/9; /* Formato panorámico de cine */
+  background-color: #eee;
+  margin-bottom: 10px; /* Espacio para el botón de trailer abajo a la derecha */
+  overflow: hidden;
+}
+
+.movie-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.trailer-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 40px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  align-items: center;
+  gap: 8px;
+}
+
+/* LAYOUT GRID DE 3 COLUMNAS */
+.movie-content-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px; /* Izq Fija | Centro Fluido | Der Fija */
+  gap: 60px;
+  padding-bottom: 60px;
+  border-bottom: 1px solid #eee; /* Línea separadora antes de Créditos */
+}
+
+/* --- COLUMNA IZQUIERDA (Specs) --- */
+.label-small {
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+  display: block;
+  color: #000;
+}
+
+.value-text {
+  font-size: 0.9rem;
+  margin-bottom: 25px;
+  display: block;
+  line-height: 1.4;
+}
+
+/* Caja Gris de detalles técnicos */
+.specs-box {
+  background-color: #f4f4f4; /* Gris muy claro exacto */
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.specs-item {
+  margin-bottom: 20px;
+}
+.specs-item:last-child {
+  margin-bottom: 0;
+}
+
+/* --- COLUMNA CENTRAL (Sinopsis/Info) --- */
+.section-header {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+.body-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 40px;
+}
+
+/* Laureles / Premios */
+.laurels-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  color: #888;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* --- COLUMNA DERECHA (Meta) --- */
+.meta-tag {
+  display: inline-block;
+  background-color: #e0e0e0; /* Gris "Pill" */
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.iniciativa-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 2px;
+  display: inline-block;
+  margin-bottom: 30px;
+}
+
+.red-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-red);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.download-link {
+  text-decoration: underline;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: black;
+  cursor: pointer;
+}
+
+/* Accordion de Créditos (Barra inferior) */
+.credits-bar {
+  padding: 20px 0;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .movie-content-grid {
+    grid-template-columns: 1fr; /* Todo en una columna en móvil */
+    gap: 40px;
+  }
+  .specs-box {
+    margin-top: 0;
+  }
+}
