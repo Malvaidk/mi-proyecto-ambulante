@@ -1,27 +1,29 @@
 "use client"
 import { useRouter } from "next/router";
 import withRole from '@/utils/withRole';
-import Head from 'next/head';
+// import Head from 'next/head'; // Opcional si lo usas
 import Link from 'next/link';
-import Header from '@/components/Header';
+// import Header from '@/components/Header'; // Descomenta si tienes el componente
 import Footer from '@/components/Footer';
-
 import { useEffect, useState } from "react";
 
-function dashboard() {
-    const router = useRouter();
-  //const years = Array.from({ length: 12 }, (_, i) => 2025 - i); 
+// Importamos los estilos
+import styles from './Dashboard.module.css';
+
+function Dashboard() { // Cambié a mayúscula "Dashboard" (convención React)
+  const router = useRouter();
   const [movies, setMovies] = useState([]);
-  let [years,setYears]=useState([]);
- 
-  const handleAddtittle=()=>{
-     router.push("/dashboard/addTittle");
+  const [years, setYears] = useState([]); // Corregido let -> const
+
+  const handleAddtittle = () => {
+     router.push("/dashboard/addTittle"); // Asegúrate que esta ruta es correcta según tus carpetas
   }
 
-  const handleYearClick =  async (year) => {
+  const handleYearClick = async (year) => {
     console.log("Año seleccionado:", year);
     fetchDataByYear(year);
   };
+
   const fetchDataByYear = async (year) => {
     try {
       const res = await fetch(`/api/getDocumentals?year=${year}`);
@@ -29,21 +31,17 @@ function dashboard() {
     
       if(!data.movies || data.movies.length === 0){
         setMovies([]);
-        setYears([...years]);
+        // setYears([...years]); // No es necesario resetear years aquí si ya existen
         return;
       }
       
       console.log("Datos recibidos:", data);
       setMovies(data.movies);
-      if(years.length===0){
-      setYears(data.availableYears);
-    }
-    else{
-        setYears([...years])
-    }
-    
-     
       
+      // Solo actualizamos los años si están vacíos al principio
+      if(years.length === 0 && data.availableYears){
+        setYears(data.availableYears);
+      }
       
     } catch (error) {
       console.log("Error al obtener datos:", error);
@@ -51,95 +49,105 @@ function dashboard() {
   };
   
   useEffect(() => {
-    fetch(`/api/getDocumentals?id=`)
-      .then(res => {
-        console.log("Raw response:", res);
-        return res.json();
-      })
+    // Carga inicial (quizás quieras pasarle el año actual o dejarlo vacío para traer todo)
+    fetch(`/api/getDocumentals`) 
+      .then(res => res.json())
       .then(data => {
-        console.log("Parsed data:", data.movies);
-        setMovies(data.movies);
-        setYears(data.availableYears);
+        setMovies(data.movies || []);
+        setYears(data.availableYears || []);
       })
       .catch(err => console.error("Fetch error:", err));
   }, []);
   
 
- 
-
   return (
-    <div className="page-wrapper">
-     
+    <div className={styles.pageWrapper}>
+      {/* <Header />  <-- Descomenta si quieres que se vea el header */}
 
-      <main className="main-content">
+      <main className={styles.mainContent}>
+        
         {/* Breadcrumb */}
-        <div className="breadcrumb">
-          <span className="back-link">← Atras Programas</span>
-          <span className="separator">/</span>
-          <span className="current">Gira de Documentales</span>
+        <div className={styles.breadcrumb}>
+          <span className={styles.backLink} onClick={() => router.push('/')}>← Inicio</span>
+          <span className={styles.separator}>/</span>
+          <span className={styles.current}>Dashboard Administrativo</span>
         </div>
 
         {/* Intro */}
-        <section className="gira-intro">
-          <h4 className="super-header">Administrar giras de documentales</h4>
-          {/*<h1 className="main-tittle">El festival de cine documental de mayor alcance en México</h1>*/}
+        <section className={styles.giraIntro}>
+          <h4 className={styles.superHeader}>Gestión de Contenido</h4>
+          <h1 className={styles.mainTitle}>Gira de Documentales</h1>
         </section>
 
-        {/* Ediciones anteriores */}
-        <section className="editions-list">
-          <h3>Ediciones anteriores</h3>
-          <div className="years-grid">
-         
-            {years.map((year) => (
+        {/* Ediciones anteriores (Botones de años) */}
+        <section className={styles.editionsList}>
+          <h3 className={styles.sectionTitle}>Filtrar por Edición</h3>
+          <div className={styles.yearsGrid}>
+            {years.length > 0 ? years.map((year) => (
               <div
                 key={year}
-                className="year-card"
+                className={styles.yearCard}
                 onClick={() => handleYearClick(year)}
               >
                 <span>Gira {year}</span>
-                <span className="arrow-icon">↗</span>
+                <span className={styles.arrowIcon}>↗</span>
               </div>
-            ))}
+            )) : <p>Cargando ediciones...</p>}
           </div>
         </section>
 
-
-       
-
-        {/* Histórico de películas */}
-        <section className="movies-history">
-          <h3>Histórico de películas programadas</h3>
-          <div className="movies-grid">
+        {/* Histórico de películas (Grid) */}
+        <section className={styles.moviesHistory}>
+          <h3 className={styles.sectionTitle}>Documentales Programados</h3>
+          
+          <div className={styles.moviesGrid}>
             
-          <div key={0} className="movie-card" onClick={() => handleAddtittle()}>
-                <div className="movie-poster-placeholder">+</div>
-                <div className="movie-details">
-                  <h4>Agregar titulo</h4>
-                  <p className="director">"agregar director"</p>
-                  <p className="meta">agregar año</p>
-                  <p className="meta">agregar cidudad</p>
-                  <span className="link-details">Ver detalles</span>
-                </div>
-              </div>
-            {movies.map((movie, idx) => (
+            {/* Tarjeta Especial: Agregar Nuevo */}
+            <div 
+              className={`${styles.movieCard} ${styles.addCard}`} 
+              onClick={handleAddtittle}
+            >
+              <div className={styles.plusIcon}>+</div>
+              <div className={styles.addText}>Agregar Nueva Película</div>
+            </div>
 
-              <div key={idx}  className="movie-card">
-                <Link href={`/dashboard/documentales/${movie.idPelicula }`}>
-                <div className="movie-poster-placeholder"></div>
-                <div className="movie-details">
-                  <h4>{movie.titulo}</h4>
-                  <p className="director">{movie.director}</p>
-                  <p className="meta">{movie.anioPub}</p>
-                  <p className="meta">{movie.country}</p>
-                  <span className="link-details">Ver detalles</span>
-                </div>
+            {/* Lista de Películas */}
+            {movies.map((movie, idx) => (
+              <div key={idx} className={styles.movieCard}>
+                <Link href={`/dashboard/documentales/${movie.idPelicula}`} style={{ textDecoration: 'none', color: 'inherit', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  
+                  {/* Poster (Si tienes URL de imagen úsala, si no, placeholder) */}
+                  {movie.imagen ? (
+                    <div 
+                        className={styles.posterPlaceholder} 
+                        style={{ 
+                            backgroundImage: `url(${movie.imagen})`, 
+                            backgroundSize: 'cover', 
+                            backgroundPosition: 'center' 
+                        }}
+                    />
+                  ) : (
+                    <div className={styles.posterPlaceholder}>
+                        <span style={{color: '#888'}}>Sin Imagen</span>
+                    </div>
+                  )}
+
+                  <div className={styles.movieDetails}>
+                    <h4 className={styles.movieTitle}>{movie.titulo}</h4>
+                    <p className={styles.director}>{movie.director}</p>
+                    
+                    <div style={{marginTop: 'auto'}}>
+                        <p className={styles.meta}>📅 {movie.anioPub} | ⏱ {movie.duracion} min</p>
+                        <div className={styles.linkDetails}>Editar / Detalles →</div>
+                    </div>
+                  </div>
                 </Link>
               </div>
             ))}
           </div>
 
-          <div className="center-button">
-             <button className="btn-transparent">Ver todo el catálogo</button>
+          <div className={styles.centerButton}>
+             <button className={styles.btnTransparent} onClick={() => fetchDataByYear('')}>Ver todo el catálogo</button>
           </div>
         </section>
       </main>
@@ -148,4 +156,5 @@ function dashboard() {
     </div>
   );
 }
-export default withRole(dashboard, ["admin_documentales"]);
+
+export default withRole(Dashboard, ["admin_documentales"]);

@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const conn = await getConnection();
 
   const [rows] = await conn.execute(
-    `SELECT * FROM vw_DetallePelicula WHERE id = ?`,
+    `SELECT * FROM vw_detallepelicula WHERE id = ?`,
     [id]
   );
 

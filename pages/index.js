@@ -3,45 +3,48 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Testimonial from '../components/Testimonial'; // 1. IMPORTAMOS EL COMPONENTE
+import Testimonial from '../components/Testimonial'; 
 import { useEffect, useState } from "react";
 
 export default function GiraPage() {
+  // 1. Declaración de Estados (Todos juntos al inicio)
   const [years, setYears] = useState(Array.from({ length: 12 }, (_, i) => 2025 - i));
   const [movies, setMovies] = useState([]);
-  const [ediciones, setEdiciones] = useState([]);
-
- // const [years, setYears] = useState([]);
-  const handleYearClick =  async (year) => {
-    console.log("Año seleccionado:", year);
-    fetchDataByYear(year);
+  const [ediciones, setEdiciones] = useState([]); // Nota: No se está usando en el JSX, pero lo dejo por si acaso.
   const [selectedYear, setSelectedYear] = useState(2024);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const handleYearClick = async (year) => {
-    setSelectedYear(year);
-    await fetchDataByYear(year);
-  };
-
+  // 2. Definición de funciones
   const fetchDataByYear = async (year) => {
     try {
       const res = await fetch(`/api/getDocumentals?year=${year}`);
       if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+      
       const data = await res.json();
       setMovies(data.movies || []);
+      
+      // Nota: Verifica si tu API devuelve 'avaiableYears' (typo) o 'availableYears'
       if (data.avaiableYears) setYears(data.avaiableYears);
+      
     } catch (error) {
       console.error("Error al obtener datos:", error);
       setMovies([]);
     }
   };
-  
 
+  const handleYearClick = async (year) => {
+    console.log("Año seleccionado:", year);
+    setSelectedYear(year);
+    setIsPlaying(false); // Opcional: Resetear el video si cambian de año
+    await fetchDataByYear(year);
+  };
   
+  // 3. useEffects
   useEffect(() => {
     fetchDataByYear(2024);
   }, []);
 
+  // 4. Renderizado
   return (
     <div>
       <Head>
@@ -57,8 +60,7 @@ export default function GiraPage() {
           <h1 className="main-title">El festival de cine documental de mayor alcance en México</h1>
           
           <div className="pink-box">
-            La Gira es nuestro proyecto más exitoso: el festival de cine documental con mayor alcance en México y un espacio de exhibición único en el mundo. Desde 2005, viaja a lugares que cuentan con poca oferta de cine documental, con el fin de crear una audiencia participativa.
-          </div>
+          La Gira es nuestro proyecto más icónico, el festival de cine documental con mayor alcance en México y un espacio de exhibición itinerante único en el mundo. En cada edición viajamos por diferentes estados del país con un programa de películas que recoge lo más relevante del documental nacional e internacional. A lo largo de veinte años, la Gira ha recorrido miles de kilómetros de nuestro territorio con una intención central: crear un encuentro emocionante y significativo entre el cine documental y su público a través de proyecciones, mediaciones, conversatorios, sesiones de preguntas y respuestas con los realizadores, talleres, clases magistrales y ¡mucho más!          </div>
 
           <div className="hero-image-container">
              <img src="https://i.postimg.cc/tCsRTPB8/ambulante1.png" alt="Ambulante Hero" className="hero-img" />
@@ -122,11 +124,11 @@ export default function GiraPage() {
                 
                 <div className="news-mini-grid">
                    <div className="news-item">
-                      <img src="https://i.postimg.cc/mDGfb1PB/image-2.webp" style={{width:'100%', height:'100%', objectFit:'cover'}} />
+                      <img src="https://i.postimg.cc/mDGfb1PB/image-2.webp" alt="Gael García" style={{width:'100%', height:'100%', objectFit:'cover'}} />
                       <span style={{position:'absolute', bottom:5, left:5, background:'white', padding:'2px 5px', fontSize:'10px', fontWeight:'bold'}}>Clase magistral con Gael García Bernal en Yucatán.</span>
                    </div>
                    <div className="news-item">
-                      <img src="https://i.postimg.cc/C10Xyy2Y/image-3.webp" style={{width:'100%', height:'100%', objectFit:'cover'}} />
+                      <img src="https://i.postimg.cc/C10Xyy2Y/image-3.webp" alt="Zoé" style={{width:'100%', height:'100%', objectFit:'cover'}} />
                       <span style={{position:'absolute', bottom:5, left:5, background:'white', padding:'2px 5px', fontSize:'10px', fontWeight:'bold'}}>Rodrigo Guardiola y Ángel Mosqueda, integrantes de Zoé durante la función de Zoé: Panoramas.</span>
                    </div>
                 </div>
@@ -169,8 +171,9 @@ export default function GiraPage() {
                 <p>Cargando o no hay películas...</p>
               )}
               
+              {/* Relleno visual si hay pocas películas */}
               {movies?.length > 0 && movies.length < 5 && Array.from({length: 5 - movies.length}).map((_, i) => (
-                 <div key={i} className="movie-card" style={{background: '#ddd'}}></div>
+                 <div key={`placeholder-${i}`} className="movie-card" style={{background: '#ddd'}}></div>
               ))}
             </div>
 

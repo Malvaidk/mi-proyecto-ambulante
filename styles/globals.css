@@ -568,3 +568,67 @@ body {
   .testimonial-quote { font-size: 1.5rem; }
   .author-info { justify-content: center; text-align: left; }
 }
+
+/* --- LOGIN & FORMULARIOS (NUEVO) --- */
+.login-wrapper {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+  padding: 100px 20px 60px 20px; /* Padding top alto para compensar el Header fijo */
+}
+
+.login-card {
+  background: var(--color-white);
+  padding: 50px;
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid #eee;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 900; /* Bold fuerte estilo Ambulante */
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: var(--color-black);
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1rem;
+  font-family: var(--font-main);
+  border: 1px solid #ccc;
+  background-color: #fff;
+  transition: all 0.3s;
+  box-sizing: border-box; 
+  border-radius: 0; /* Bordes cuadrados para estilo más serio */
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-black);
+  background-color: #fafafa;
+}
+
+.error-msg {
+  color: var(--color-red);
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+  background: var(--color-pink-bg);
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #fadbd8;
+}
+

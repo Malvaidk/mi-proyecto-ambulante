@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, Globe } from 'lucide-react';
+import { Search, Globe, User } from 'lucide-react';
 
 export default function Header() {
   return (
@@ -14,7 +14,6 @@ export default function Header() {
         {/* NAVEGACIÓN CENTRAL */}
         <nav className="header-nav">
           <Link href="/festival" className="nav-link">Festival</Link>
-          {/* Este tiene la clase especial para el fondo negro */}
           <Link href="/programa" className="nav-link active-btn">Programa</Link> 
           <Link href="/contenido" className="nav-link">Contenido</Link>
           <Link href="/prensa" className="nav-link">Prensa</Link>
@@ -24,11 +23,19 @@ export default function Header() {
 
         {/* UTILIDADES (DERECHA) */}
         <div className="header-utils">
+          
           <div className="lang-selector">
             <Globe size={14} />
-            <span>Español</span>
+            <span>ES</span>
           </div>
-          <Search size={16} className="search-icon" />
+
+          {/* Opción de Login Nueva */}
+          <Link href="/logIn" className="lang-selector" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <User size={16} />
+            <span>Ingresar</span>
+          </Link>
+
+          <Search size={16} className="search-icon" style={{ marginLeft: '10px' }} />
         </div>
 
       </div>

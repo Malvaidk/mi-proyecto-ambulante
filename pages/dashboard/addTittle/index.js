@@ -1,19 +1,9 @@
-"use client";
-import { validatePelicula } from "@/utils/validations";
-import { useEffect, useState } from "react";
-import withRole from "@/utils/withRole";
+import { useState } from "react";
 import { useRouter } from "next/router";
+import styles from './addMovie.module.css'; 
 
-function AgregarPelicula() {
+export default function AgregarPelicula() {
   const router = useRouter();
-  const [errors, setErrors] = useState({});
-  const [data, setData] = useState({
-    directors: [],
-    editions: [],
-    languages: [],
-    topics: [],
-    prizes: []
-  });
 
   const [form, setForm] = useState({
     titulo: "",
@@ -23,224 +13,203 @@ function AgregarPelicula() {
     imagen: "",
     iniciativa: "",
     descarga: "",
-    idEdicion: "",
-    director: "",
-    idiomas: [],
-    tematicas: [],
-    premios: []
+    // Ahora estos son textos simples
+    numEdicion: "", 
+    directorNombre: "",
+    idiomas: "",   // Ej: "Español, Inglés"
+    tematicas: "", // Ej: "Social, Música"
+    premios: ""    // Ej: "Morelia, Cannes"
   });
 
-  useEffect(() => {
-    fetch("/api/getData")
-      .then(res => res.json())
-      .then(setData)
-      .catch(console.error);
-  }, []);
-
-   const handleChange = (field, value) => {
+  const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
-  };
-
-  const addMulti = (field, value) => {
-    if (!form[field].includes(value)) {
-      setForm(prev => ({ ...prev, [field]: [...prev[field], value] }));
-    }
-  };
-
-  const removeMulti = (field, value) => {
-    setForm(prev => ({
-      ...prev,
-      [field]: prev[field].filter(v => v !== value)
-    }));
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
   
-    const { isValid, errors } = validatePelicula(form);
-    setErrors(errors);
+    if (!form.titulo || !form.directorNombre || !form.numEdicion) {
+      alert("Por favor completa los campos obligatorios (*)");
+      return;
+    }
   
-    if (!isValid) return;
-  
-    const res = await fetch("/api/addTittle", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
-    });
-  
-    const data = await res.json();
-    alert(data.message);
-  };
-  
-
-  
-  return (
+    try {
+      const res = await fetch("/api/addTittle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
     
-    <form onSubmit={handleSubmit} className="form-pelicula">
-       <section className="documental-actions">
-          <button onClick={() => router.push("/dashboard")}>
-            ← Volver al dashboard
+      const responseData = await res.json();
+      
+      if (res.ok) {
+        alert("✅ " + responseData.message);
+        router.push('/dashboard');
+      } else {
+        alert("❌ Error: " + responseData.message);
+      }
+    } catch (error) {
+      alert("Error de conexión");
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Nueva Película (Ingreso Manual)</h1>
+        <button onClick={() => router.push("/dashboard")} className={styles.backButton}>
+          ← Cancelar
+        </button>
+      </div>
+
+      <div className={styles.card}>
+        <form onSubmit={handleSubmit} className={styles.formGrid}>
+          
+          {/* TÍTULO */}
+          <div className={styles.fullWidth}>
+            <label className={styles.label}>Título Oficial *</label>
+            <input
+              className={styles.input}
+              placeholder="Ej: Híbridos"
+              value={form.titulo}
+              onChange={e => handleChange("titulo", e.target.value)}
+              required
+            />
+          </div>
+
+          {/* DURACIÓN Y AÑO */}
+          <div>
+            <label className={styles.label}>Duración (min) *</label>
+            <input
+              type="number"
+              className={styles.input}
+              placeholder="90"
+              value={form.duracion}
+              onChange={e => handleChange("duracion", e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className={styles.label}>Año de Publicación *</label>
+            <input
+              type="number"
+              className={styles.input}
+              placeholder="2024"
+              value={form.anioPub}
+              onChange={e => handleChange("anioPub", e.target.value)}
+              required
+            />
+          </div>
+
+          {/* SINOPSIS */}
+          <div className={styles.fullWidth}>
+            <label className={styles.label}>Sinopsis *</label>
+            <textarea
+              className={styles.textarea}
+              value={form.sinopsis}
+              onChange={e => handleChange("sinopsis", e.target.value)}
+              rows={3}
+              required
+            />
+          </div>
+
+          {/* DIRECTOR Y EDICIÓN (MANUALES) */}
+          <div>
+            <label className={styles.label}>Nombre del Director *</label>
+            <input
+              className={styles.input}
+              placeholder="Ej: Alfonso Cuarón"
+              value={form.directorNombre}
+              onChange={e => handleChange("directorNombre", e.target.value)}
+              required
+            />
+            <small style={{fontSize: '0.75rem', color: '#666'}}>Debe estar registrado previamente.</small>
+          </div>
+
+          <div>
+            <label className={styles.label}>Número de Edición *</label>
+            <input
+              type="number"
+              className={styles.input}
+              placeholder="Ej: 19"
+              value={form.numEdicion}
+              onChange={e => handleChange("numEdicion", e.target.value)}
+              required
+            />
+          </div>
+
+          {/* URLs */}
+          <div>
+            <label className={styles.label}>URL Imagen</label>
+            <input
+              type="url"
+              className={styles.input}
+              value={form.imagen}
+              onChange={e => handleChange("imagen", e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className={styles.label}>URL Descarga</label>
+            <input
+              type="url"
+              className={styles.input}
+              value={form.descarga}
+              onChange={e => handleChange("descarga", e.target.value)}
+            />
+          </div>
+
+          <div className={styles.fullWidth}>
+             <label className={styles.label}>Iniciativa</label>
+             <input
+              className={styles.input}
+              value={form.iniciativa}
+              onChange={e => handleChange("iniciativa", e.target.value)}
+            />
+          </div>
+
+          {/* CAMPOS MULTIPLES MANUALES */}
+          <div className={styles.fullWidth}>
+            <h3 className={styles.sectionTitle}>Etiquetas (Separar por comas)</h3>
+          </div>
+
+          <div className={styles.fullWidth}>
+            <label className={styles.label}>Idiomas</label>
+            <input
+              className={styles.input}
+              placeholder="Ej: Español, Inglés, Maya"
+              value={form.idiomas}
+              onChange={e => handleChange("idiomas", e.target.value)}
+            />
+          </div>
+
+          <div className={styles.fullWidth}>
+            <label className={styles.label}>Temáticas</label>
+            <input
+              className={styles.input}
+              placeholder="Ej: Social, Medio Ambiente, Música"
+              value={form.tematicas}
+              onChange={e => handleChange("tematicas", e.target.value)}
+            />
+          </div>
+
+          <div className={styles.fullWidth}>
+            <label className={styles.label}>Premios / Festivales</label>
+            <input
+              className={styles.input}
+              placeholder="Ej: Festival de Cannes, Premio Ariel"
+              value={form.premios}
+              onChange={e => handleChange("premios", e.target.value)}
+            />
+          </div>
+
+          <button type="submit" className={styles.submitButton}>
+            Guardar Película
           </button>
-        </section>
-      <h1 href="/dash">Hola</h1>
-      <h2>Agregar Película</h2>
 
-      <input
-        placeholder="Título"
-        value={form.titulo}
-        onChange={e => handleChange("titulo", e.target.value)}
-        required
-      />
-
-      <input
-        type="number"
-        placeholder="Duración (min)"
-        value={form.duracion}
-        onChange={e => handleChange("duracion", e.target.value)}
-        required
-      />
-
-      <input
-        type="number"
-        placeholder="Año publicación"
-        value={form.anioPub}
-        onChange={e => handleChange("anioPub", e.target.value)}
-        required
-      />
-
-      <textarea
-        placeholder="Sinopsis"
-        value={form.sinopsis}
-        onChange={e => handleChange("sinopsis", e.target.value)}
-        rows={4}
-        required
-      />
-
-      <input
-        type="url"
-        placeholder="URL imagen"
-        value={form.imagen}
-        onChange={e => handleChange("imagen", e.target.value)}
-      />
-
-      <input
-        placeholder="Iniciativa"
-        value={form.iniciativa}
-        onChange={e => handleChange("iniciativa", e.target.value)}
-      />
-
-      <input
-        type="url"
-        placeholder="URL descarga"
-        value={form.descarga}
-        onChange={e => handleChange("descarga", e.target.value)}
-      />
-
-     
-      <select
-        value={form.director}
-        onChange={e => handleChange("director", e.target.value)}
-        required
-      >
-        <option value="">Selecciona director</option>
-        {data.directors.map(d => (
-          <option key={d.director} value={d.director}>
-            {d.director}
-          </option>
-        ))}
-      </select>
-
-           <select
-        value={form.idEdicion}
-        onChange={e => handleChange("idEdicion", e.target.value)}
-        required
-      >
-        <option value="">Selecciona edición</option>
-        {data.editions.map(e => (
-          <option key={e.edicion} value={e.edicion}>
-            {e.numEdicion}
-          </option>
-        ))}
-      </select>
-
-      
-      <h4>Idiomas</h4>
-      <select onChange={e => addMulti("idiomas", Number(e.target.value))}>
-        <option value="">Agregar idioma</option>
-        {data.languages.map(i => (
-          <option key={i.idIdioma} value={i.idIdioma}>
-            {i.idioma}
-          </option>
-        ))}
-      </select>
-
-      <ul>
-        {form.idiomas.map(id => {
-          const idioma = data.languages.find(i => i.idIdioma === id);
-          return (
-            <li key={id}>
-              {idioma?.idioma}
-              <button type="button" onClick={() => removeMulti("idiomas", id)}>
-                ✕
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      
-      <h4>Temáticas</h4>
-      <select onChange={e => addMulti("tematicas", Number(e.target.value))}>
-        <option value="">Agregar temática</option>
-        {data.topics.map(t => (
-          <option key={t.idTematica} value={t.idTematica}>
-            {t.tematica}
-          </option>
-        ))}
-      </select>
-
-      <ul>
-        {form.tematicas.map(id => {
-          const t = data.topics.find(x => x.idTematica === id);
-          return (
-            <li key={id}>
-              {t?.tematica}
-              <button type="button" onClick={() => removeMulti("tematicas", id)}>
-                ✕
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      
-      <h4>Premios</h4>
-      <select onChange={e => addMulti("premios", Number(e.target.value))}>
-        <option value="">Agregar premio</option>
-        {data.prizes.map(p => (
-          <option key={p.idPremio} value={p.idPremio}>
-            {p.premio}
-          </option>
-        ))}
-      </select>
-
-      <ul>
-        {form.premios.map(id => {
-          const p = data.prizes.find(x => x.idPremio === id);
-          return (
-            <li key={id}>
-              {p?.premio}
-              <button type="button" onClick={() => removeMulti("premios", id)}>
-                ✕
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      <button type="submit">Guardar película</button>
-    </form>
+        </form>
+      </div>
+    </div>
   );
 }
-
-export default withRole(AgregarPelicula, ["admin_documentales"]);
