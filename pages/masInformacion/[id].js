@@ -23,7 +23,7 @@ function DocumentalPage() {
           duracion: data.duracion,
           anio_publicacion: data.anio_publicacion,
           director: data.director,
-          sinopsis: data.sinopsis, 
+          sinopsis: data.sinopsis, // 👈 ojo aquí (tenías sipnosis)
           url_imagen: data.url_imagen,
           iniciativa: data.iniciativa,
           url_descarga: data.url_descarga,
@@ -118,4 +118,4 @@ function DocumentalPage() {
   );
 }
 
-export default withRole(DocumentalPage, ["admin_documentales"]);
+export default DocumentalPage();

@@ -1,124 +1,128 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useState } from "react";
 import withRole from "@/utils/withRole";
+import { useRouter } from "next/router";
 
-function AgregarDocumental() {
-  const [title, setTitle] = useState("");
-  const [year, setYear] = useState("");
-  const [director, setDirector] = useState("");
-  const [country, setCountry] = useState("");
-  const [presentationDate, setPresentationDate] = useState("");
-
-  const [directorsList, setDirectorsList] = useState([]);
-  const [countriesList, setCountriesList] = useState([]);
-
+function AgregarPelicula() {
   const router = useRouter();
+  const { id } = router.query;
 
-  useEffect(() => {
-    fetch("/api/getData")
-      .then(res => res.json())
-      .then(data => {
-        setDirectorsList(data.directors);
-        setCountriesList(data.countries);
-      });
-  }, []);
+  const [form, setForm] = useState({
+    
+    titulo: "",
+    duracion: "",
+    anioPub: "",
+    sinopsis: "",
+    imagen: "",
+    iniciativa: "",
+    descarga: "",
+    idEdicion: "",
+    director: ""
+  });
 
-  const handleSubmit = async (e) => {
+  const handleChange = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    console.log(title,year,director,country);
-    if (!title || !year || !director || !country) {
-       
-      alert("Todos los campos son obligatorios");
-      return;
-    }
+
+    const body = {
+      pelicula: {
+        ...form
+      },
+      idiomas: [1, 2],
+      tematicas: [3, 5],
+      premios: [2],
+      participantes: [
+        { curp: form.director, rol: "Director" }
+      ]
+    };
 
     const res = await fetch("/api/addTittle", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, year, director, country, presentationDate }),
+      body: JSON.stringify(body)
     });
 
     const data = await res.json();
-
-    if (res.ok) {
-      alert("Documental agregado correctamente");
-      router.push("/dashboard");
-    } else {
-      alert(data.message);
-    }
-  };
+    alert(data.message);
+  }
 
   return (
-    <div>
-      <h2 onClick={() => router.push("/dashboard")}>← Regresar</h2>
-      <h1>Agregar Documental</h1>
+    <form onSubmit={handleSubmit} className="form-pelicula">
+     
+      <input
+        placeholder="Título"
+        value={form.titulo}
+        onChange={e => handleChange("titulo", e.target.value)}
+        required
+      />
 
-      <form onSubmit={handleSubmit}>
+      <input
+        type="number"
+        placeholder="Duración (min)"
+        value={form.duracion}
+        onChange={e => handleChange("duracion", e.target.value)}
+        required
+      />
 
-        <input
-          placeholder="Título"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-        />
+      <input
+        type="number"
+        placeholder="Año de publicación"
+        value={form.anioPub}
+        onChange={e => handleChange("anioPub", e.target.value)}
+        required
+      />
 
-        <input
-          placeholder="Año"
-          value={year}
-          onChange={e => setYear(e.target.value)}
-        />
-        <label>Fecha de presentación:</label>
-        <input
-        type="date"
-        value={presentationDate}
-        onChange={e => setPresentationDate(e.target.value)}
-        />
+      <textarea
+        placeholder="Sinopsis"
+        value={form.sinopsis}
+        onChange={e => handleChange("sinopsis", e.target.value)}
+        rows={4}
+        required
+      />
 
+      <input
+        type="url"
+        placeholder="URL de la imagen"
+        value={form.imagen}
+        onChange={e => handleChange("imagen", e.target.value)}
+      />
 
-        {/* DIRECTOR */}
-        <label>Director existente:</label>
-        <select
-          onChange={e => setDirector(e.target.value)}
-          value=""
-        >
-          <option value="">Selecciona uno</option>
-          {directorsList.map(d => (
-            <option key={d.idDirector} value={d.director}>
-              {d.director}
-            </option>
-          ))}
-        </select>
+      <input
+        placeholder="Iniciativa (ej. Gira Ambulante)"
+        value={form.iniciativa}
+        onChange={e => handleChange("iniciativa", e.target.value)}
+      />
 
-        <p>O escribe un nuevo director:</p>
-        <input
-          placeholder="Nuevo director"
-          onChange={e => setDirector(e.target.value)}
-        />
+      <input
+        type="url"
+        placeholder="URL de descarga / visualización"
+        value={form.descarga}
+        onChange={e => handleChange("descarga", e.target.value)}
+      />
 
-        {/* PAÍS */}
-        <label>País existente:</label>
-        <select
-          onChange={e => setCountry(e.target.value)}
-          value=""
-        >
-          <option value="">Selecciona uno</option>
-          {countriesList.map(c => (
-            <option key={c.idCountry} value={c.country}>
-              {c.country}
-            </option>
-          ))}
-        </select>
+      <input
+        type="number"
+        placeholder="ID de edición"
+        value={form.idEdicion}
+        onChange={e => handleChange("idEdicion", e.target.value)}
+        required
+      />
 
-        <p>O escribe un nuevo país:</p>
-        <input
-          placeholder="Nuevo país"
-          onChange={e => setCountry(e.target.value)}
-        />
+      <input
+        placeholder="CURP del director"
+        value={form.director}
+        onChange={e => handleChange("director", e.target.value)}
+        required
+      />
 
-        <button type="submit">Guardar</button>
-      </form>
-    </div>
+      <button type="submit">
+        Guardar película
+      </button>
+    </form>
   );
 }
 
-export default withRole(AgregarDocumental, ["admin_documentales"]);
+export default withRole(AgregarPelicula, ["admin_documentales"]);

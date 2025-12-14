@@ -1,4 +1,4 @@
-import { getConnection } from "@/lib/connection";
+import { getConnection } from "@/lib/connectionAdmin";
 
 export default async function handler(req, res) {
   try {

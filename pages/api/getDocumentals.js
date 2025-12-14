@@ -7,13 +7,13 @@ export default async function handler(req, res) {
 
  
     let query = `
-      SELECT * from DocumentalDirector
+      SELECT * from vw_FichaTecnica
     `;
 
     let params = [];
 
     if (year) {
-      query += " WHERE presentationDate LIKE ?";
+      query += " WHERE gira LIKE ?";
       params.push(`${year}%`);
     }
 
@@ -21,9 +21,8 @@ export default async function handler(req, res) {
 
   
     const [years] = await conn.execute(`
-      SELECT DISTINCT YEAR(dd_presentationDate) AS year
-      FROM dateDocumental
-      WHERE dd_presentationDate IS NOT NULL
+      SELECT DISTINCT YEAR(fechaInicio) AS year, idEdicion as Edición
+      FROM ediciones
       ORDER BY year 
     `);
 

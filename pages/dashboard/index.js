@@ -72,7 +72,7 @@ function dashboard() {
   };
   
   useEffect(() => {
-    fetch(`/api/getDocumentals?year=2024`)
+    fetch(`/api/getDocumentals?id=`)
       .then(res => {
         console.log("Raw response:", res);
         return res.json();
@@ -152,12 +152,12 @@ function dashboard() {
             {movies.map((movie, idx) => (
 
               <div key={idx}  className="movie-card">
-                <Link href={`/dashboard/documentales/${movie.id}`}>
+                <Link href={`/dashboard/documentales/${movie.idPelicula }`}>
                 <div className="movie-poster-placeholder"></div>
                 <div className="movie-details">
-                  <h4>{movie.title}</h4>
-                  <p className="director">{movie.Director}</p>
-                  <p className="meta">{movie.year}</p>
+                  <h4>{movie.titulo}</h4>
+                  <p className="director">{movie.director}</p>
+                  <p className="meta">{movie.anioPub}</p>
                   <p className="meta">{movie.country}</p>
                   <span className="link-details">Ver detalles</span>
                 </div>
