@@ -1,90 +1,71 @@
 "use client";
-import { validatePelicula } from "@/utils/validations";
 import { useEffect, useState } from "react";
-import withRole from "@/utils/withRole";
-import { useRouter } from "next/router";
 
-function AgregarPelicula() {
-  const router = useRouter();
-  const [errors, setErrors] = useState({});
-  const [data, setData] = useState({
-    directors: [],
-    editions: [],
-    languages: [],
-    topics: [],
-    prizes: []
-  });
-
-  const [form, setForm] = useState({
-    titulo: "",
-    duracion: "",
-    anioPub: "",
-    sinopsis: "",
-    imagen: "",
-    iniciativa: "",
-    descarga: "",
-    idEdicion: "",
-    director: "",
-    idiomas: [],
-    tematicas: [],
-    premios: []
-  });
+export default function FormPelicula({
+  initialData,
+  data,
+  onSubmit,
+  submitText = "Guardar"
+}) {
+  const [form, setForm] = useState(null);
 
   useEffect(() => {
-    fetch("/api/getData")
-      .then(res => res.json())
-      .then(setData)
-      .catch(console.error);
-  }, []);
+    if (initialData) {
+      setForm({
+        ...initialData,
+        idiomasIds: initialData.idiomasIds || [],
+        tematicasIds: initialData.tematicasIds || [],
+        premiosIds: initialData.premiosIds || []
+      });
+    }
+  }, [initialData]);
 
-   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+  if (!form) return <p>Cargando formulario...</p>;
+
+  /* ======================
+     HELPERS
+  ====================== */
+
+  const handleChange = (field, value) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const addMulti = (field, value) => {
+    if (!Array.isArray(form[field])) return;
     if (!form[field].includes(value)) {
-      setForm(prev => ({ ...prev, [field]: [...prev[field], value] }));
+      setForm(prev => ({
+        ...prev,
+        [field]: [...prev[field], value]
+      }));
     }
   };
 
   const removeMulti = (field, value) => {
+    if (!Array.isArray(form[field])) return;
     setForm(prev => ({
       ...prev,
       [field]: prev[field].filter(v => v !== value)
     }));
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = e => {
     e.preventDefault();
-  
-    const { isValid, errors } = validatePelicula(form);
-    setErrors(errors);
-  
-    if (!isValid) return;
-  
-    const res = await fetch("/api/addTittle", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
-    });
-  
-    const data = await res.json();
-    alert(data.message);
+    onSubmit(form);
   };
-  
 
-  
+  /* ======================
+     FORM
+  ====================== */
+
   return (
-    
     <form onSubmit={handleSubmit} className="form-pelicula">
-       <section className="documental-actions">
-          <button onClick={() => router.push("/dashboard")}>
-            ← Volver al dashboard
-          </button>
-        </section>
-      <h1 href="/dash">Hola</h1>
-      <h2>Agregar Película</h2>
 
+      <h2>{submitText}</h2>
+
+      {/* BÁSICOS */}
       <input
         placeholder="Título"
         value={form.titulo}
@@ -117,26 +98,24 @@ function AgregarPelicula() {
       />
 
       <input
-        type="url"
         placeholder="URL imagen"
-        value={form.imagen}
+        value={form.imagen || ""}
         onChange={e => handleChange("imagen", e.target.value)}
       />
 
       <input
         placeholder="Iniciativa"
-        value={form.iniciativa}
+        value={form.iniciativa || ""}
         onChange={e => handleChange("iniciativa", e.target.value)}
       />
 
       <input
-        type="url"
         placeholder="URL descarga"
-        value={form.descarga}
+        value={form.descarga || ""}
         onChange={e => handleChange("descarga", e.target.value)}
       />
 
-     
+      {/* DIRECTOR */}
       <select
         value={form.director}
         onChange={e => handleChange("director", e.target.value)}
@@ -144,28 +123,29 @@ function AgregarPelicula() {
       >
         <option value="">Selecciona director</option>
         {data.directors.map(d => (
-          <option key={d.director} value={d.director}>
+          <option key={d.curp} value={d.director}>
             {d.director}
           </option>
         ))}
       </select>
 
-           <select
-        value={form.idEdicion}
+      {/* EDICIÓN */}
+      <select
+        value={form.edicion}
         onChange={e => handleChange("idEdicion", e.target.value)}
         required
       >
         <option value="">Selecciona edición</option>
         {data.editions.map(e => (
           <option key={e.edicion} value={e.edicion}>
-            {e.numEdicion}
+            Edición {e.numEdicion}
           </option>
         ))}
       </select>
 
-      
+      {/* IDIOMAS */}
       <h4>Idiomas</h4>
-      <select onChange={e => addMulti("idiomas", Number(e.target.value))}>
+      <select onChange={e => addMulti("idiomasIds", Number(e.target.value))}>
         <option value="">Agregar idioma</option>
         {data.languages.map(i => (
           <option key={i.idIdioma} value={i.idIdioma}>
@@ -175,12 +155,15 @@ function AgregarPelicula() {
       </select>
 
       <ul>
-        {form.idiomas.map(id => {
+        {form.idiomasIds.map(id => {
           const idioma = data.languages.find(i => i.idIdioma === id);
           return (
             <li key={id}>
               {idioma?.idioma}
-              <button type="button" onClick={() => removeMulti("idiomas", id)}>
+              <button
+                type="button"
+                onClick={() => removeMulti("idiomasIds", id)}
+              >
                 ✕
               </button>
             </li>
@@ -188,9 +171,9 @@ function AgregarPelicula() {
         })}
       </ul>
 
-      
+      {/* TEMÁTICAS */}
       <h4>Temáticas</h4>
-      <select onChange={e => addMulti("tematicas", Number(e.target.value))}>
+      <select onChange={e => addMulti("tematicasIds", Number(e.target.value))}>
         <option value="">Agregar temática</option>
         {data.topics.map(t => (
           <option key={t.idTematica} value={t.idTematica}>
@@ -200,12 +183,15 @@ function AgregarPelicula() {
       </select>
 
       <ul>
-        {form.tematicas.map(id => {
+        {form.tematicasIds.map(id => {
           const t = data.topics.find(x => x.idTematica === id);
           return (
             <li key={id}>
               {t?.tematica}
-              <button type="button" onClick={() => removeMulti("tematicas", id)}>
+              <button
+                type="button"
+                onClick={() => removeMulti("tematicasIds", id)}
+              >
                 ✕
               </button>
             </li>
@@ -213,9 +199,9 @@ function AgregarPelicula() {
         })}
       </ul>
 
-      
+      {/* PREMIOS */}
       <h4>Premios</h4>
-      <select onChange={e => addMulti("premios", Number(e.target.value))}>
+      <select onChange={e => addMulti("premiosIds", Number(e.target.value))}>
         <option value="">Agregar premio</option>
         {data.prizes.map(p => (
           <option key={p.idPremio} value={p.idPremio}>
@@ -225,12 +211,15 @@ function AgregarPelicula() {
       </select>
 
       <ul>
-        {form.premios.map(id => {
+        {form.premiosIds.map(id => {
           const p = data.prizes.find(x => x.idPremio === id);
           return (
             <li key={id}>
               {p?.premio}
-              <button type="button" onClick={() => removeMulti("premios", id)}>
+              <button
+                type="button"
+                onClick={() => removeMulti("premiosIds", id)}
+              >
                 ✕
               </button>
             </li>
@@ -238,9 +227,7 @@ function AgregarPelicula() {
         })}
       </ul>
 
-      <button type="submit">Guardar película</button>
+      <button type="submit">{submitText}</button>
     </form>
   );
 }
-
-export default withRole(AgregarPelicula, ["admin_documentales"]);

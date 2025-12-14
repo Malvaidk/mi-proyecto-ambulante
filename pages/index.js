@@ -9,6 +9,12 @@ import { useEffect, useState } from "react";
 export default function GiraPage() {
   const [years, setYears] = useState(Array.from({ length: 12 }, (_, i) => 2025 - i));
   const [movies, setMovies] = useState([]);
+  const [ediciones, setEdiciones] = useState([]);
+
+ // const [years, setYears] = useState([]);
+  const handleYearClick =  async (year) => {
+    console.log("Año seleccionado:", year);
+    fetchDataByYear(year);
   const [selectedYear, setSelectedYear] = useState(2024);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -29,6 +35,8 @@ export default function GiraPage() {
       setMovies([]);
     }
   };
+  
+
   
   useEffect(() => {
     fetchDataByYear(2024);

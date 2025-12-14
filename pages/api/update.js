@@ -1,65 +1,155 @@
-import { getConnection } from "../../lib/connectionAdmin";
+import { getConnection } from "@/lib/connectionAdmin";
+
+function diff(actual = [], nuevo = []) {
+  if (!Array.isArray(actual)) actual = [];
+  if (!Array.isArray(nuevo)) nuevo = [];
+
+  return {
+    agregar: nuevo.filter(id => !actual.includes(id)),
+    eliminar: actual.filter(id => !nuevo.includes(id))
+  };
+}
 
 export default async function handler(req, res) {
-  if (req.method !== "PUT") {
-    return res.status(405).json({ message: "Método no permitido" });
-  }
-
   try {
-    const { id, title, year, director, country, dates } = req.body;
+    const { id } = req.query;
     const conn = await getConnection();
 
-    // DIRECTOR
-    const [dir] = await conn.execute(
-      "SELECT idDirector FROM director WHERE dir_name = ?",
+
+    const {
+      titulo,
+      duracion,
+      anioPub,
+      sinopsis,
+      imagen,
+      iniciativa,
+      descarga,
+      idEdicion,
+      director,
+      idiomasIds = [],
+      tematicasIds = [],
+      premiosIds = []
+    } = req.body;
+console.log(req.body);
+    await conn.beginTransaction();
+    const [[dir]] = await conn.query(
+      `
+      SELECT d.curp
+      FROM directores d
+      JOIN participantes p ON p.curp = d.curp
+      WHERE p.nombre = ?
+      `,
       [director]
     );
 
-    let directorId = dir.length
-      ? dir[0].idDirector
-      : (await conn.execute(
-          "INSERT INTO director (dir_name) VALUES (?)",
-          [director]
-        ))[0].insertId;
+    const curpDirector = dir.curp;
 
-    // PAÍS
-    const [cty] = await conn.execute(
-      "SELECT idCountry FROM country WHERE coun_name = ?",
-      [country]
+    /* 1️⃣ Actualizar película */
+    await conn.query(
+      `
+      UPDATE peliculas
+      SET titulo=?, duracion=?, anioPub=?, sinopsis=?, imagen=?, iniciativa=?,
+          descarga=?, idEdicion=?, director=?
+      WHERE idPelicula=?
+      `,
+      [
+        titulo,
+        duracion,
+        anioPub,
+        sinopsis,
+        imagen || null,
+        iniciativa || null,
+        descarga || null,
+        idEdicion,
+        curpDirector,
+        id
+      ]
     );
 
-    let countryId = cty.length
-      ? cty[0].idCountry
-      : (await conn.execute(
-          "INSERT INTO country (coun_name) VALUES (?)",
-          [country]
-        ))[0].insertId;
-
-    // DOCUMENTAL
-    await conn.execute(
-      `UPDATE documental
-       SET doc_title=?, doc_year=?, idDirector=?, idCountry=?
-       WHERE doc_id=?`,
-      [title, year, directorId, countryId, id]
-    );
-
-    // FECHAS (simple: borrar y volver a insertar)
-    await conn.execute(
-      "DELETE FROM dateDocumental WHERE idDocumental=?",
+    /* 2️⃣ IDIOMAS */
+    const [[idiomasActuales]] = await conn.query(
+      `SELECT GROUP_CONCAT(idIdioma) AS ids FROM relPeliIdm WHERE idPelicula=?`,
       [id]
     );
 
-    for (const d of dates) {
-      await conn.execute(
-        "INSERT INTO dateDocumental (idDocumental, dd_presentationDate) VALUES (?, ?)",
-        [id, d]
+    const actualIdiomas = idiomasActuales?.ids
+      ? idiomasActuales.ids.split(",").map(Number)
+      : [];
+
+    const dIdiomas = diff(actualIdiomas, idiomasIds);
+
+    for (const i of dIdiomas.eliminar) {
+      await conn.query(
+        `DELETE FROM relPeliIdm WHERE idPelicula=? AND idIdioma=?`,
+        [id, i]
       );
     }
 
-    res.status(200).json({ message: "Actualizado correctamente" });
+    for (const i of dIdiomas.agregar) {
+      await conn.query(
+        `INSERT INTO relPeliIdm (idPelicula,idIdioma) VALUES (?,?)`,
+        [id, i]
+      );
+    }
+
+    /* 3️⃣ TEMÁTICAS */
+    const [[temActuales]] = await conn.query(
+      `SELECT GROUP_CONCAT(idTematica) AS ids FROM relPeliTem WHERE idPelicula=?`,
+      [id]
+    );
+
+    const actualTem = temActuales?.ids
+      ? temActuales.ids.split(",").map(Number)
+      : [];
+
+    const dTem = diff(actualTem, tematicasIds);
+
+    for (const t of dTem.eliminar) {
+      await conn.query(
+        `DELETE FROM relPeliTem WHERE idPelicula=? AND idTematica=?`,
+        [id, t]
+      );
+    }
+
+    for (const t of dTem.agregar) {
+      await conn.query(
+        `INSERT INTO relPeliTem (idPelicula,idTematica) VALUES (?,?)`,
+        [id, t]
+      );
+    }
+
+    /* 4️⃣ PREMIOS */
+    const [[premActuales]] = await conn.query(
+      `SELECT GROUP_CONCAT(idFesPrem) AS ids FROM relPeliPrem WHERE idPelicula=?`,
+      [id]
+    );
+
+    const actualPrem = premActuales?.ids
+      ? premActuales.ids.split(",").map(Number)
+      : [];
+
+    const dPrem = diff(actualPrem, premiosIds);
+
+    for (const p of dPrem.eliminar) {
+      await conn.query(
+        `DELETE FROM relPeliPrem WHERE idPelicula=? AND idFesPrem=?`,
+        [id, p]
+      );
+    }
+
+    for (const p of dPrem.agregar) {
+      await conn.query(
+        `INSERT INTO relPeliPrem (idPelicula,idFesPrem) VALUES (?,?)`,
+        [id, p]
+      );
+    }
+
+    await conn.commit();
+
+    res.status(200).json({ message: "Documental actualizado correctamente" });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error al actualizar" });
+    res.status(500).json({ message: "Error al actualizar", error: error.message });
   }
 }
