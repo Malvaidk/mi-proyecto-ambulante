@@ -1,47 +1,36 @@
 import Link from 'next/link';
-
-const menuItems = [
-  { name: 'Nosotros', href: '/nosotros' },
-  { name: 'Programas', href: '/programas' },
-  { name: 'Calendario', href: '/calendario' },
-  { name: 'Películas', href: '/peliculas' },
-  { name: 'Blog', href: '/blog' },
-  { name: 'Aliados', href: '/aliados' },
-];
+import { Search, Globe } from 'lucide-react';
 
 export default function Header() {
   return (
-    <header className="header-container">
-      <div className="nav-wrapper">
+    <header className="site-header">
+      <div className="header-container">
         
-        {/* Logo */}
-        <div className="logo">
-          <Link href="/">
-            <span className="logo-text">Ambulante</span>
-          </Link>
-        </div>
+        {/* LOGO */}
+        <Link href="/" className="header-logo">
+          AMBULANTE
+        </Link>
 
-        {/* Menú */}
-        <nav className="main-nav">
-          <ul>
-            {menuItems.map((item) => (
-              <li key={item.name}>
-                <Link href={item.href}>
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        {/* NAVEGACIÓN CENTRAL */}
+        <nav className="header-nav">
+          <Link href="/festival" className="nav-link">Festival</Link>
+          {/* Este tiene la clase especial para el fondo negro */}
+          <Link href="/programa" className="nav-link active-btn">Programa</Link> 
+          <Link href="/contenido" className="nav-link">Contenido</Link>
+          <Link href="/prensa" className="nav-link">Prensa</Link>
+          <Link href="/blog" className="nav-link">Blog</Link>
+          <Link href="/aliados" className="nav-link">Aliados</Link>
         </nav>
-        <Link href="/logIn">Iniciar sesión</Link>
 
-        {/* Idioma */}
-        <div className="language-selector">
-          <Link href="?locale=en-US">
-            <span className="lang-link">EN</span>
-          </Link>
-          <span className="lang-active">ES</span>
+        {/* UTILIDADES (DERECHA) */}
+        <div className="header-utils">
+          <div className="lang-selector">
+            <Globe size={14} />
+            <span>Español</span>
+          </div>
+          <Search size={16} className="search-icon" />
         </div>
+
       </div>
     </header>
   );

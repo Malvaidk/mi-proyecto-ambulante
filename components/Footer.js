@@ -1,77 +1,69 @@
 import Link from 'next/link';
-
-const footerLinks = [
-  { 
-    title: 'PARA TI', 
-    links: [
-      { name: 'Películas', href: '/peliculas' }, 
-      { name: 'Calendario', href: '/calendario' }, 
-      { name: 'Centro de prensa', href: '/prensa' }
-    ] 
-  },
-  { 
-    title: 'PROGRAMAS', 
-    links: [
-      { name: 'Gira Ambulante', href: '/gira' }, 
-      { name: 'Ambulante Más Allá', href: '/mas-alla' }, 
-      { name: 'Ambulante Presenta', href: '/presenta' },
-      { name: 'Ambulante Ediciones', href: '/ediciones' },
-      { name: 'Vivero', href: '/vivero' }
-    ] 
-  },
-  { 
-    title: 'INFORMACIÓN', 
-    links: [
-      { name: 'Directorio', href: '/directorio' }, 
-      { name: 'Aviso de Privacidad', href: '/aviso-privacidad' }, 
-      { name: 'Contraloría Social', href: '/contraloria' },
-      { name: 'Vacantes', href: '/vacantes' }
-    ] 
-  },
-];
+import { ArrowRight, Instagram, Twitter, Facebook, Youtube } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="footer-container">
-      
-      <div className="footer-top-content">
+    <footer className="site-footer">
+      <div className="container">
         
-        {/* Columnas de enlaces */}
-        <div className="footer-links-grid">
-          {footerLinks.map((col) => (
-            <div key={col.title} className="footer-column">
-              <h4>{col.title}</h4>
-              <ul>
-                {col.links.map((link) => (
-                  <li key={link.name}>
-                    <Link href={link.href}>{link.name}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        
-        {/* Contacto y Newsletter */}
-        <div className="footer-contact-newsletter">
-          <h4>Contáctanos</h4>
-          <p>hola@ambulante.org</p>
-          <p>+52 (55) 5511 5073</p>
-          <p className="address">
-            Zacatecas 142-A, Roma Norte, Cuauhtémoc, C.P. 06700, Ciudad de México
-          </p>
+        {/* TOP SECTION: 4 COLUMNAS */}
+        <div className="footer-top">
           
-          <div className="newsletter-form">
-            <input type="email" placeholder="Suscríbete al newsletter" />
-            <button type="submit">&gt;</button>
+          <div className="footer-col">
+            <h5>Sobre</h5>
+            <ul>
+              <li><Link href="#">Festival</Link></li>
+              <li><Link href="#">Ambulante Más Allá</Link></li>
+              <li><Link href="#">Ambulante Presenta</Link></li>
+              <li><Link href="#">Colaboradores</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h5>Voluntarios</h5>
+            <ul>
+              <li><Link href="#">Ambulante Gira 2025</Link></li>
+              <li><Link href="#">Ambulante Abierto</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h5>Información</h5>
+            <ul>
+              <li><Link href="#">Noticias</Link></li>
+              <li><Link href="#">Aviso de Privacidad</Link></li>
+              <li><Link href="#">Términos de Uso</Link></li>
+              <li><Link href="#">Prensa</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h5>Contáctanos</h5>
+            <p>Suscríbete al boletín</p>
+            <div className="newsletter-form">
+              <input type="email" placeholder="Ingresa tu correo" className="newsletter-input" />
+              <ArrowRight size={16} color="black" />
+            </div>
+            <span className="phone-number">+52 (55) 5555 5555</span>
+          </div>
+
+        </div>
+
+        {/* BOTTOM SECTION */}
+        <div className="footer-bottom">
+          <div className="header-logo" style={{ fontSize: '1.2rem' }}>AMBULANTE</div>
+          
+          <div>
+            <div className="social-icons">
+               <Instagram size={18} color="black" />
+               <Twitter size={18} color="black" />
+               <Facebook size={18} color="black" />
+               <Youtube size={18} color="black" />
+            </div>
+            <p className="address-text">Zacatecas 142-A, Roma Norte, Cuauhtémoc, 06700 Ciudad de México</p>
           </div>
         </div>
-        
-      </div>
 
-      <div className="footer-bottom-bar">
-        <p>© 2024 Ambulante. Todos los derechos reservados</p>
-        <p><Link href="/cookies">Manejo de Cookies</Link></p>
       </div>
     </footer>
   );
