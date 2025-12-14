@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 export default function GiraPage() {
   const years = Array.from({ length: 12 }, (_, i) => 2025 - i); 
   const [movies, setMovies] = useState([]);
+  const [ediciones, setEdiciones] = useState([]);
+
  // const [years, setYears] = useState([]);
   const handleYearClick =  async (year) => {
     console.log("Año seleccionado:", year);
@@ -16,16 +18,34 @@ export default function GiraPage() {
   };
   const fetchDataByYear = async (year) => {
     try {
-      const res = await fetch(`/api/getDocumentals?year=${year}`);
-      const data = await res.json();
-      console.log("Datos recibidos:", data);
-      setMovies(data.movies);
-      setYears(data.avaiableYears);
-      console.log(data.years);
+      const [resMovies, resEdiciones] = await Promise.all([
+        fetch(`/api/getDocumentals?year=${year}`),
+        fetch(`/api/getEdiciones?year=${year}`)
+      ]);
+  
+      const dataMovies = await resMovies.json();
+      const dataEdiciones = await resEdiciones.json();
+  
+    
+      if (!dataMovies.movies || dataMovies.movies.length === 0) {
+        setMovies([]);
+      } else {
+        setMovies(dataMovies.movies);
+      }
+  
+      setEdiciones(dataEdiciones[0]|| []);
+  
+
+      if (years.length === 0 && dataMovies.availableYears) {
+        setYears(dataMovies.availableYears);
+      }
+  
     } catch (error) {
-      console.log("Error al obtener datos:", error);
+      console.error("Error al obtener datos:", error);
     }
   };
+  
+
   
   useEffect(() => {
     fetch(`/api/getDocumentals?year=2024`)
@@ -92,20 +112,45 @@ export default function GiraPage() {
         </section>
 
 
-        {/* Edición actual */}
-        <section className="current-edition">
-          <div className="edition-info">
-            <h2>20ª edición</h2>
-            <p className="dates">Del 2 de abril al 15 de junio [...]</p>
-            <p className="edition-desc">
-              Oleajes se presenta como un concepto [...]
-            </p>
-            <div className="action-buttons">
-              <button className="btn-transparent">Descargar programas</button>
-              <button className="btn-transparent">Ver catálogo de películas</button>
-            </div>
-          </div>
-        </section>
+       
+        {ediciones && (
+  <section className="current-edition">
+    <div className="edition-info">
+
+      <h2>{ediciones.titulo_edicion}</h2>
+
+      <p className="dates">
+       {ediciones.fechas_y_estados}
+      </p>
+
+      <p className="edition-desc">
+        {ediciones.concepto}
+      </p>
+
+      <div className="action-buttons">
+        {ediciones.programaUrl && (
+          <a
+            href={currentEdition.programaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-transparent"
+          >
+            Descargar programa
+          </a>
+        )}
+
+        <button
+          className="btn-transparent"
+          onClick={() => handleYearClick(currentEdition.anio)}
+        >
+          Ver catálogo de películas
+        </button>
+      </div>
+
+    </div>
+  </section>
+)}
+
 
         {/* Histórico de películas */}
         <section className="movies-history">

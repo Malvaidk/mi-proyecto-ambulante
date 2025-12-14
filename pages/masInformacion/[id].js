@@ -23,7 +23,7 @@ function DocumentalPage() {
           duracion: data.duracion,
           anio_publicacion: data.anio_publicacion,
           director: data.director,
-          sinopsis: data.sinopsis, // 👈 ojo aquí (tenías sipnosis)
+          sinopsis: data.sinopsis, 
           url_imagen: data.url_imagen,
           iniciativa: data.iniciativa,
           url_descarga: data.url_descarga,
@@ -31,6 +31,7 @@ function DocumentalPage() {
           idiomas: data.idiomas,
           tematicas: data.tematicas,
           premios_ganados: data.premios_ganados,
+          duracion:data.duracion
         });
         setLoading(false);
       });
@@ -118,4 +119,4 @@ function DocumentalPage() {
   );
 }
 
-export default DocumentalPage();
+export default withRole(DocumentalPage, ["admin_documentales"]);

@@ -1,35 +1,29 @@
-import bcrypt from "bcrypt";
-import { getConnection } from "../../lib/connection";
+import mysql from "mysql2/promise";
 
 export default async function handler(req, res) {
   try {
     const { email, password } = req.body;
-    const conn = await getConnection();
 
-    const [rows] = await conn.execute(
-      "SELECT * FROM users WHERE email = ?",
-      [email]
-    );
+   
+    const conn = await mysql.createConnection({
+      host: "localhost",
+      user: email,
+      password: password
+    });
 
-    if (rows.length === 0) {
-      return res.status(401).json({ message: "Usuario no encontrado" });
-    }
+    
+    await conn.end();
 
-    const user = rows[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: "Contraseña incorrecta" });
-    }
-
+    
     res.status(200).json({
-      id: user.id,
-      email: user.email,
-      role: user.role,
+      email,
+            role:"admin_documentales"
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error en el login" });
+    console.error(error.message);
+    res.status(401).json({
+      message: "Credenciales inválidas"
+    });
   }
 }

@@ -13,32 +13,11 @@ function dashboard() {
   //const years = Array.from({ length: 12 }, (_, i) => 2025 - i); 
   const [movies, setMovies] = useState([]);
   let [years,setYears]=useState([]);
-  const handleadd = () => {
-
-    const newYear = prompt("Ingrese el año");
-  
-    if (!newYear) return;
-  
-    if (!/^\d{4}$/.test(newYear)) {
-      alert("Año inválido");
-      return;
-    }
-  
-    // Verificar si ya existe
-    if (years.includes(newYear)) {
-      alert("Ese año ya existe");
-      return;
-    }
-    setYears([...years, newYear]);
-    console.log(years);
-    console.log(newYear);
-  };
+ 
   const handleAddtittle=()=>{
      router.push("/dashboard/addTittle");
   }
-  const handleEditTittle=(movie)=>{
-    router.push(`dashboard/addTittle/${movie}`);
-  }
+
   const handleYearClick =  async (year) => {
     console.log("Año seleccionado:", year);
     fetchDataByYear(year);
@@ -110,14 +89,7 @@ function dashboard() {
         <section className="editions-list">
           <h3>Ediciones anteriores</h3>
           <div className="years-grid">
-          <div
-                key="agregar"
-                className="year-card"
-                onClick={() => handleadd()}
-              >
-                <span>Agregar año</span>
-                <span className="arrow-icon">↗</span>
-              </div>
+         
             {years.map((year) => (
               <div
                 key={year}
