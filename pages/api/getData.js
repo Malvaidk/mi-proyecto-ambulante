@@ -1,55 +1,57 @@
-import { getConnection } from "../../lib/connectionAdmin"; // Ajusta la ruta si usas @/lib o ../../lib
+import { getConnection } from "../../lib/connection";
 
 export default async function handler(req, res) {
+  // Objeto base por si falla algo, que no rompa la página
+  const result = {
+    idiomas: [],
+    tematicas: [],
+    premios: [],
+    ediciones: [],
+    directores: []
+  };
+
   try {
     const conn = await getConnection();
 
-    // 1. DIRECTORES: Usamos JOIN para traer SOLO a quienes existen en la tabla 'directores'
-    const [directors] = await conn.execute(`
-      SELECT p.nombre AS director
-      FROM participantes p
-      INNER JOIN directores d ON p.curp = d.curp
-      ORDER BY p.nombre
-    `);
+    // 1. IDIOMAS
+    try {
+      const [rows] = await conn.execute("SELECT * FROM idiomas ORDER BY idioma ASC");
+      result.idiomas = rows;
+    } catch (e) { console.error("⚠️ Error Idiomas:", e.message); }
 
-    // 2. EDICIONES: Agregamos el año (YEAR) para que en el select se vea "Edición 19 (2024)"
-    const [editions] = await conn.execute(`
-      SELECT idEdicion AS edicion, numEdicion, YEAR(fechaInicio) as anio
-      FROM ediciones 
-      ORDER BY numEdicion DESC
-    `);
+    // 2. TEMÁTICAS
+    try {
+      const [rows] = await conn.execute("SELECT * FROM tematicas ORDER BY tematica ASC");
+      result.tematicas = rows;
+    } catch (e) { console.error("⚠️ Error Temáticas:", e.message); }
 
-    // 3. PREMIOS
-    const [prizes] = await conn.execute(`
-      SELECT nombre AS premio, idFesPrem AS idPremio
-      FROM fespremios
-      ORDER BY premio
-    `);
+    // 3. PREMIOS (Corrección: tabla 'fespremios')
+    try {
+      const [rows] = await conn.execute("SELECT * FROM fespremios ORDER BY nombre ASC");
+      result.premios = rows;
+    } catch (e) { console.error("⚠️ Error Premios:", e.message); }
 
-    // 4. IDIOMAS
-    const [languages] = await conn.execute(`
-      SELECT idIdioma, idioma
-      FROM idiomas
-      ORDER BY idioma
-    `);
+    // 4. EDICIONES
+    try {
+      const [rows] = await conn.execute("SELECT * FROM ediciones ORDER BY fechaInicio DESC");
+      result.ediciones = rows;
+    } catch (e) { console.error("⚠️ Error Ediciones:", e.message); }
 
-    // 5. TEMÁTICAS
-    const [topics] = await conn.execute(`
-      SELECT idTematica, tematica
-      FROM tematicas
-      ORDER BY tematica
-    `);
-    
-    res.status(200).json({
-      directors,  // Devuelve [{ director: "Nombre" }, ...]
-      editions,   // Devuelve [{ edicion: 123, numEdicion: 19, anio: 2024 }, ...]
-      prizes,
-      languages,
-      topics
-    });
+    // 5. DIRECTORES
+    try {
+      const [rows] = await conn.execute(`
+        SELECT p.nombre AS director, d.curp
+        FROM directores d
+        JOIN participantes p ON p.curp = d.curp
+        ORDER BY p.nombre ASC
+      `);
+      result.directores = rows;
+    } catch (e) { console.error("⚠️ Error Directores:", e.message); }
+
+    res.status(200).json(result);
 
   } catch (error) {
-    console.error("Error en getData:", error);
-    res.status(500).json({ error: "Error al obtener datos auxiliares" });
+    console.error("❌ Error General getData:", error);
+    res.status(500).json({ message: "Error de conexión" });
   }
 }

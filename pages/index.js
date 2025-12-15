@@ -49,7 +49,7 @@ const editionsData = {
     descripcion: "Ecologías del cine, el tema central de la Gira, hace referencia al papel que las imágenes en movimiento pueden jugar respecto a la explotación del medio ambiente. A través de la tierra y el territorio, como horizontes de sentido y pivotes de la acción colectiva, buscamos amplificar las historias de defensores en la primera línea de una crisis climática que desplaza cuerpos, trastoca los medios de subsistencia de comunidades y evidencia la inequidad con que se distribuyen los efectos negativos del extractivismo.",
     poster: "https://i.postimg.cc/FRPsKzZM/image-13.webp",
     videoId: "loxZ-ofTHF4",
-    news1: { img: "https://i.postimg.cc/HWhkDJjD/image-14.webp", text: "Función inaugural en la exedra de la Plaza Patria en Aguascalientes." },
+    news1: { img: "https://i.postimg.cc/HWhkDJjD/image-14.webp", text: "Función inaugural en la exedra de la Plaza Patria en Aguascalientes." },
     news2: { img: "https://i.postimg.cc/9Q3X0vdX/image-15.webp", text: "Néstor Bravo, Yareli Rivera y Daniela Niniz Rojas, equipo de 'Tsihueri, el que fue valiente'." }
   },
   2020: {
@@ -309,14 +309,20 @@ export default function GiraPage() {
               {movies?.length > 0 ? (
                 movies.slice(0, 5).map((movie, idx) => (
                   <Link 
-                    href={`/masInformacion/${movie.id || movie.idPelicula}`} // Ajustado a tu ruta nueva
+                    href={`/masInformacion/${movies.idPelicula || movies.id}`} 
                     key={movie.idPelicula || movie.id || idx}
                     className={`movie-card ${idx === 0 ? 'featured' : ''}`}
                   >
                       <img 
-                        src={movie.imagen || movie.url_imagen || "/images/placeholder-movie.jpg"} 
+                        // CAMBIO: Manejo seguro de imagen (URL DB > local > placeholder)
+                        src={movie.imagen || "https://via.placeholder.com/600x900?text=Sin+Imagen"} 
                         alt={movie.titulo} 
                         className="movie-bg"
+                        // Fallback si la URL existe pero está caída
+                        onError={(e) => {
+                          e.target.onerror = null; 
+                          e.target.src = "https://via.placeholder.com/600x900?text=No+Disponible";
+                        }}
                       />
                       <div className="movie-info-overlay">
                         <h3 style={{ margin: 0, fontSize: idx === 0 ? '1.5rem' : '1rem' }}>{movie.titulo}</h3>

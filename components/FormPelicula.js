@@ -1,233 +1,211 @@
-"use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function FormPelicula({
-  initialData,
-  data,
-  onSubmit,
-  submitText = "Guardar"
-}) {
-  const [form, setForm] = useState(null);
+export default function FormPelicula({ initialData, data, onSubmit, submitText }) {
+  const [form, setForm] = useState({
+    titulo: "",
+    duracion: "",
+    anioPub: "",
+    sinopsis: "",
+    imagen: "",
+    descarga: "",
+    idEdicion: "",
+    director: "", 
+    idiomasIds: [],
+    tematicasIds: [],
+    premiosIds: []
+  });
 
+  // Cargar datos iniciales si estamos editando
   useEffect(() => {
     if (initialData) {
-      setForm({
-        ...initialData,
-        idiomasIds: initialData.idiomasIds || [],
-        tematicasIds: initialData.tematicasIds || [],
-        premiosIds: initialData.premiosIds || []
-      });
+      setForm(initialData);
     }
   }, [initialData]);
 
-  if (!form) return <p>Cargando formulario...</p>;
-
-  /* ======================
-     HELPERS
-  ====================== */
-
-  const handleChange = (field, value) => {
-    setForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
 
-  const addMulti = (field, value) => {
-    if (!Array.isArray(form[field])) return;
-    if (!form[field].includes(value)) {
-      setForm(prev => ({
-        ...prev,
-        [field]: [...prev[field], value]
-      }));
+  /* Lógica para agregar/quitar elementos de las listas */
+  const handleAddItem = (selectId, listName) => {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    const value = parseInt(select.value);
+    
+    if (!value) return; 
+
+    if (form[listName]?.includes(value)) {
+      alert("Ya agregaste este elemento.");
+      return;
     }
+
+    setForm({
+      ...form,
+      [listName]: [...(form[listName] || []), value]
+    });
+    
+    select.value = ""; 
   };
 
-  const removeMulti = (field, value) => {
-    if (!Array.isArray(form[field])) return;
-    setForm(prev => ({
-      ...prev,
-      [field]: prev[field].filter(v => v !== value)
-    }));
+  const handleRemoveItem = (idToRemove, listName) => {
+    setForm({
+      ...form,
+      [listName]: form[listName].filter(id => id !== idToRemove)
+    });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(form);
   };
 
-  /* ======================
-     FORM
-  ====================== */
+  // Helpers para mostrar nombres en los chips
+  const getNombre = (list, id, idKey) => list?.find(item => item[idKey] === id)?.nombre || list?.find(item => item[idKey] === id)?.idioma || "Cargando...";
+
+  // Evitar error si data es null
+  const safeData = data || {};
 
   return (
-    <form onSubmit={handleSubmit} className="form-pelicula">
+    <form onSubmit={handleSubmit} className="form-admin">
+      
+      {/* --- DATOS BÁSICOS --- */}
+      <div className="form-group">
+        <label>Título:</label>
+        <input type="text" name="titulo" value={form.titulo || ""} onChange={handleChange} required />
+      </div>
 
-      <h2>{submitText}</h2>
+      <div className="form-group">
+        <label>Duración (min):</label>
+        <input type="text" name="duracion" value={form.duracion || ""} onChange={handleChange} />
+      </div>
 
-      {/* BÁSICOS */}
-      <input
-        placeholder="Título"
-        value={form.titulo}
-        onChange={e => handleChange("titulo", e.target.value)}
-        required
-      />
+      <div className="form-group">
+        <label>Año Publicación:</label>
+        <input type="number" name="anioPub" value={form.anioPub || ""} onChange={handleChange} />
+      </div>
 
-      <input
-        type="number"
-        placeholder="Duración (min)"
-        value={form.duracion}
-        onChange={e => handleChange("duracion", e.target.value)}
-        required
-      />
+      <div className="form-group full-width">
+        <label>Sinopsis:</label>
+        <textarea name="sinopsis" rows="3" value={form.sinopsis || ""} onChange={handleChange} />
+      </div>
 
-      <input
-        type="number"
-        placeholder="Año publicación"
-        value={form.anioPub}
-        onChange={e => handleChange("anioPub", e.target.value)}
-        required
-      />
+      <div className="form-group">
+        <label>URL Imagen:</label>
+        <input type="url" name="imagen" value={form.imagen || ""} onChange={handleChange} />
+      </div>
 
-      <textarea
-        placeholder="Sinopsis"
-        value={form.sinopsis}
-        onChange={e => handleChange("sinopsis", e.target.value)}
-        rows={4}
-        required
-      />
+      <div className="form-group">
+        <label>Link Video/Descarga:</label>
+        <input type="text" name="descarga" value={form.descarga || ""} onChange={handleChange} />
+      </div>
 
-      <input
-        placeholder="URL imagen"
-        value={form.imagen || ""}
-        onChange={e => handleChange("imagen", e.target.value)}
-      />
+      {/* --- SELECTOR DE DIRECTOR --- */}
+      <div className="form-group full-width">
+        <label>Director:</label>
+        <select name="director" value={form.director || ""} onChange={handleChange} required>
+          <option value="">-- Selecciona director --</option>
+          {(safeData.directores || []).map((d) => (
+            <option key={d.curp} value={d.director}>{d.director}</option>
+          ))}
+        </select>
+      </div>
 
-      <input
-        placeholder="Iniciativa"
-        value={form.iniciativa || ""}
-        onChange={e => handleChange("iniciativa", e.target.value)}
-      />
+      {/* --- SELECTOR DE EDICIÓN --- */}
+      <div className="form-group full-width">
+        <label>Edición:</label>
+        <select name="idEdicion" value={form.idEdicion || ""} onChange={handleChange} required>
+          <option value="">-- Selecciona edición --</option>
+          {(safeData.ediciones || []).map((e) => (
+            <option key={e.idEdicion} value={e.idEdicion}>
+              Edición {e.numEdicion} ({new Date(e.fechaInicio).getFullYear()})
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <input
-        placeholder="URL descarga"
-        value={form.descarga || ""}
-        onChange={e => handleChange("descarga", e.target.value)}
-      />
+      <hr style={{ gridColumn: '1 / -1', margin: '20px 0', border: '0', borderTop: '1px solid #eee' }} />
 
-      {/* DIRECTOR */}
-      <select
-        value={form.director}
-        onChange={e => handleChange("director", e.target.value)}
-        required
-      >
-        <option value="">Selecciona director</option>
-        {data.directors.map(d => (
-          <option key={d.curp} value={d.director}>
-            {d.director}
-          </option>
-        ))}
-      </select>
-
-      {/* EDICIÓN */}
-      <select
-        value={form.edicion}
-        onChange={e => handleChange("idEdicion", e.target.value)}
-        required
-      >
-        <option value="">Selecciona edición</option>
-        {data.editions.map(e => (
-          <option key={e.edicion} value={e.edicion}>
-            Edición {e.numEdicion}
-          </option>
-        ))}
-      </select>
-
-      {/* IDIOMAS */}
-      <h4>Idiomas</h4>
-      <select onChange={e => addMulti("idiomasIds", Number(e.target.value))}>
-        <option value="">Agregar idioma</option>
-        {data.languages.map(i => (
-          <option key={i.idIdioma} value={i.idIdioma}>
-            {i.idioma}
-          </option>
-        ))}
-      </select>
-
-      <ul>
-        {form.idiomasIds.map(id => {
-          const idioma = data.languages.find(i => i.idIdioma === id);
-          return (
-            <li key={id}>
-              {idioma?.idioma}
-              <button
-                type="button"
-                onClick={() => removeMulti("idiomasIds", id)}
-              >
-                ✕
-              </button>
+      {/* --- IDIOMAS --- */}
+      <div className="form-group full-width">
+        <h4>Idiomas</h4>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+          <select id="selIdioma">
+            <option value="">-- Agregar idioma --</option>
+            {(safeData.idiomas || []).map(i => (
+              <option key={i.idIdioma} value={i.idIdioma}>{i.idioma}</option>
+            ))}
+          </select>
+          <button type="button" onClick={() => handleAddItem("selIdioma", "idiomasIds")}>+</button>
+        </div>
+        <ul style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
+          {form.idiomasIds?.map(id => (
+            <li key={id} style={{ background:'#eee', padding:'2px 8px', borderRadius:'10px' }}>
+              {getNombre(safeData.idiomas, id, 'idIdioma')}
+              <button type="button" onClick={() => handleRemoveItem(id, "idiomasIds")} style={{marginLeft:'5px', color:'red', border:'none'}}>x</button>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      </div>
 
-      {/* TEMÁTICAS */}
-      <h4>Temáticas</h4>
-      <select onChange={e => addMulti("tematicasIds", Number(e.target.value))}>
-        <option value="">Agregar temática</option>
-        {data.topics.map(t => (
-          <option key={t.idTematica} value={t.idTematica}>
-            {t.tematica}
-          </option>
-        ))}
-      </select>
+      {/* --- SECCIÓN TEMÁTICAS --- */}
+      <div className="form-group full-width">
+        <h4>Temáticas</h4>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+          <select id="selTematica">
+            <option value="">-- Agregar temática --</option>
+            {(safeData.tematicas || []).map(t => (
+              <option key={t.idTematica} value={t.idTematica}>
+                {t.nombre || t.tematica} 
+              </option>
+            ))}
+          </select>
+          <button type="button" onClick={() => handleAddItem("selTematica", "tematicasIds")}>+</button>
+        </div>
+        
+        <ul style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
+          {form.tematicasIds?.map(id => {
+            // Buscamos el item en la lista
+            const item = safeData.tematicas?.find(t => t.idTematica === id);
+            // Mostramos el texto correcto
+            const texto = item ? (item.nombre || item.tematica) : "Cargando...";
+            
+            return (
+              <li key={id} style={{ background:'#eee', padding:'2px 8px', borderRadius:'10px' }}>
+                {texto}
+                <button type="button" onClick={() => handleRemoveItem(id, "tematicasIds")} style={{marginLeft:'5px', color:'red', border:'none'}}>x</button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
 
-      <ul>
-        {form.tematicasIds.map(id => {
-          const t = data.topics.find(x => x.idTematica === id);
-          return (
-            <li key={id}>
-              {t?.tematica}
-              <button
-                type="button"
-                onClick={() => removeMulti("tematicasIds", id)}
-              >
-                ✕
-              </button>
+      {/* --- PREMIOS (fespremios) --- */}
+      <div className="form-group full-width">
+        <h4>Premios / Festivales</h4>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+          <select id="selPremio">
+            <option value="">-- Agregar premio --</option>
+            {(safeData.premios || []).map(p => (
+              <option key={p.idFesPrem} value={p.idFesPrem}>{p.nombre}</option>
+            ))}
+          </select>
+          <button type="button" onClick={() => handleAddItem("selPremio", "premiosIds")}>+</button>
+        </div>
+        <ul style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
+          {form.premiosIds?.map(id => (
+            <li key={id} style={{ background:'#eee', padding:'2px 8px', borderRadius:'10px' }}>
+              {getNombre(safeData.premios, id, 'idFesPrem')}
+              <button type="button" onClick={() => handleRemoveItem(id, "premiosIds")} style={{marginLeft:'5px', color:'red', border:'none'}}>x</button>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      </div>
 
-      {/* PREMIOS */}
-      <h4>Premios</h4>
-      <select onChange={e => addMulti("premiosIds", Number(e.target.value))}>
-        <option value="">Agregar premio</option>
-        {data.prizes.map(p => (
-          <option key={p.idPremio} value={p.idPremio}>
-            {p.premio}
-          </option>
-        ))}
-      </select>
+      <button type="submit" style={{ marginTop: '20px', padding:'15px', background:'black', color:'white', border:'none', cursor:'pointer' }}>
+        {submitText || "Guardar Cambios"}
+      </button>
 
-      <ul>
-        {form.premiosIds.map(id => {
-          const p = data.prizes.find(x => x.idPremio === id);
-          return (
-            <li key={id}>
-              {p?.premio}
-              <button
-                type="button"
-                onClick={() => removeMulti("premiosIds", id)}
-              >
-                ✕
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      <button type="submit">{submitText}</button>
     </form>
   );
 }

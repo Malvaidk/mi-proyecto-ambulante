@@ -826,3 +826,231 @@ body {
     margin-top: 0;
   }
 }
+
+/* --- ESTILOS ADMIN / EDICIÓN --- */
+.admin-page-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: var(--font-main);
+  background-color: #f9f9f9; /* Fondo gris suave para distinguir del sitio público */
+  min-height: 100vh;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 20px;
+}
+
+.admin-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--color-black);
+}
+
+.btn-back {
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #666;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-back:hover {
+  border-color: var(--color-black);
+  color: var(--color-black);
+}
+
+/* Tarjeta del Formulario */
+.edit-card {
+  background: white;
+  padding: 40px;
+  border: 1px solid #eee;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin-bottom: 40px;
+}
+
+/* Zona de Peligro (Eliminar) */
+.danger-zone {
+  border: 1px solid #ffcccc;
+  background-color: #fff5f5;
+  padding: 30px;
+  border-radius: 4px;
+  margin-top: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.danger-text h4 {
+  margin: 0 0 5px 0;
+  color: #c62828;
+}
+
+.danger-text p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.btn-delete {
+  background-color: white;
+  color: #c62828;
+  border: 1px solid #c62828;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-delete:hover {
+  background-color: #c62828;
+  color: white;
+}
+
+/* --- ESTILOS DEL FORMULARIO (DENTRO DE LA TARJETA) --- */
+
+/* 1. Hacemos que el formulario use Grid para aprovechar el espacio */
+.edit-card form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas */
+  gap: 20px;
+}
+
+/* Elementos que deben ocupar todo el ancho (Título, Sinopsis, etc) */
+.edit-card form > div:first-child, /* Asume que el primer div es el título */
+.edit-card form textarea {
+  grid-column: span 2;
+}
+
+/* 2. Estilo de los Inputs y Selects */
+.edit-card input[type="text"],
+.edit-card input[type="number"],
+.edit-card input[type="url"],
+.edit-card select,
+.edit-card textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: #fff;
+  transition: border-color 0.2s;
+  box-sizing: border-box; /* Vital para que el padding no rompa el ancho */
+}
+
+.edit-card input:focus,
+.edit-card select:focus,
+.edit-card textarea:focus {
+  border-color: var(--color-black, #333);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+/* 3. Etiquetas (Labels) más bonitas */
+.edit-card label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 4. Secciones de "Chips" (Idiomas, Temáticas, Premios) */
+/* Asumimos que están en un contenedor div */
+.edit-card h3, 
+.edit-card h4 {
+  grid-column: span 2;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+  font-size: 1.2rem;
+}
+
+/* Contenedor de las listas (ul) */
+.edit-card ul {
+  grid-column: span 2;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Los "Chips" o etiquetas (li) */
+.edit-card ul li {
+  background-color: #f0f0f0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ddd;
+}
+
+/* El botón de eliminar (X) dentro del chip */
+.edit-card ul li button {
+  background: #ccc;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.edit-card ul li button:hover {
+  background: #ff4444;
+}
+
+/* 5. Botones de Acción (Agregar idioma, Guardar, etc) */
+.edit-card button[type="submit"] {
+  grid-column: span 2;
+  background-color: var(--color-black, #000);
+  color: white;
+  padding: 15px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.edit-card button[type="submit"]:hover {
+  background-color: #333;
+}
+
+/* Botones pequeños para agregar items */
+.edit-card select + button, 
+.edit-card input + button { 
+  margin-left: 10px;
+  padding: 8px 15px;
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}

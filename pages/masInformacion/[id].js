@@ -1,14 +1,12 @@
-"use client";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-// import withRole from "@/utils/withRole"; <-- ELIMINADO
 import Header from "../../components/Header"; 
 import Footer from "../../components/Footer"; 
 import { PlayCircle } from 'lucide-react'; 
 
-export default function DocumentalPage() { // Ahora exportamos directamente la función
+export default function DocumentalPage() {
   const router = useRouter();
   const { id } = router.query;
 
@@ -16,22 +14,51 @@ export default function DocumentalPage() { // Ahora exportamos directamente la f
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Si no hay ID todavía (el router está cargando), no hacemos nada
     if (!id) return;
 
-    fetch(`/api/getDocumentalById?id=${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setDocumental(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [id]);
+    // Definimos la función de carga dentro del efecto
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setDocumental(null); // Limpiamos la peli anterior para evitar mezclas visuales
 
-  if (loading) return <div style={{height: '100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>Cargando...</div>;
-  if (!documental) return <p>No encontrado</p>;
+        const res = await fetch(`/api/getDocumentalById?id=${id}`);
+        
+        if (!res.ok) {
+           throw new Error("Error al obtener datos");
+        }
+
+        const data = await res.json();
+        setDocumental(data);
+
+      } catch (err) {
+        console.error("Error fetching documental:", err);
+        setDocumental(null);
+      } finally {
+        // Esto se ejecuta siempre, haya éxito o error
+        setLoading(false);
+      }
+    };
+
+    // Ejecutamos la función
+    fetchData();
+
+  }, [id]); // Se ejecuta cada vez que cambia el ID
+
+  if (loading) return (
+    <div style={{height: '100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>
+      Cargando...
+    </div>
+  );
+  
+  // Verificamos si documental es null antes de intentar renderizarlo
+  if (!documental) return (
+    <div style={{height: '100vh', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
+      <h1>Documental no encontrado</h1>
+      <Link href="/" style={{marginTop: '20px', textDecoration:'underline'}}>Volver al inicio</Link>
+    </div>
+  );
 
   return (
     <>
@@ -47,7 +74,6 @@ export default function DocumentalPage() { // Ahora exportamos directamente la f
           
           {/* 1. BREADCRUMBS */}
           <div className="breadcrumbs">
-            {/* Cambié el link de "dashboard" a "programacion" o la lista pública para que tenga sentido */}
             <Link href="/programa">← Atrás</Link>
             <span>/</span>
             <Link href="/">Inicio</Link>
@@ -61,28 +87,40 @@ export default function DocumentalPage() { // Ahora exportamos directamente la f
           {/* 3. HERO IMAGE */}
           <div className="movie-hero-container">
             <img
-              src={documental.url_imagen || "/images/placeholder-wide.jpg"}
+              src={documental.imagen || "/images/placeholder-wide.jpg"}
               alt={documental.titulo}
               className="movie-hero-img"
+              onError={(e) => {
+                e.target.onerror = null; 
+                e.target.src = "/images/placeholder-wide.jpg"; 
+              }}
             />
           </div>
           
+          {/* Botón de Trailer */}
           <div className="trailer-btn-row">
-            <PlayCircle size={18} />
-            <span>Ver Tráiler</span>
+            {documental.url_descarga ? (
+              <a href={documental.url_descarga} target="_blank" rel="noopener noreferrer" style={{display:'flex', alignItems:'center', gap:'8px', textDecoration:'none', color:'inherit'}}>
+                <PlayCircle size={18} />
+                <span>Ver Tráiler</span>
+              </a>
+            ) : (
+              <span style={{opacity:0.5, display:'flex', alignItems:'center', gap:'8px'}}>
+                 <PlayCircle size={18} /> Sin Tráiler
+              </span>
+            )}
           </div>
 
-          {/* 4. GRID DE CONTENIDO (3 COLUMNAS) */}
+          {/* 4. GRID DE CONTENIDO */}
           <div className="movie-content-grid">
             
-            {/* --- COLUMNA IZQUIERDA: SPECS --- */}
+            {/* --- COLUMNA IZQUIERDA --- */}
             <aside>
               <div style={{ marginBottom: '20px' }}>
                 <span className="label-small">DIRECCIÓN</span>
                 <span className="value-text">{documental.director}</span>
               </div>
 
-              {/* Caja Gris */}
               <div className="specs-box">
                 <div className="specs-item">
                   <span className="label-small">DURACIÓN</span>
@@ -106,7 +144,7 @@ export default function DocumentalPage() { // Ahora exportamos directamente la f
               </div>
             </aside>
 
-            {/* --- COLUMNA CENTRAL: INFO --- */}
+            {/* --- COLUMNA CENTRAL --- */}
             <section>
               <h2 className="section-header">Sinopsis</h2>
               <p className="body-text">{documental.sinopsis}</p>
@@ -129,7 +167,7 @@ export default function DocumentalPage() { // Ahora exportamos directamente la f
               </div>
             </section>
 
-            {/* --- COLUMNA DERECHA: META --- */}
+            {/* --- COLUMNA DERECHA --- */}
             <aside>
               <div style={{ marginBottom: '40px' }}>
                  <span className="label-small">TEMÁTICAS</span>
@@ -147,10 +185,10 @@ export default function DocumentalPage() { // Ahora exportamos directamente la f
               </div>
 
               <div>
-                 <span className="label-small">DESCARGAS</span>
+                 <span className="label-small">ENLACES</span>
                  {documental.url_descarga ? (
-                   <a href={documental.url_descarga} target="_blank" className="download-link">
-                     Ver / Descargar Stills
+                   <a href={documental.url_descarga} target="_blank" rel="noopener noreferrer" className="download-link">
+                     Ver Material / Video
                    </a>
                  ) : (
                    <span style={{color:'#999', fontSize:'0.9rem'}}>No disponible</span>
@@ -160,12 +198,10 @@ export default function DocumentalPage() { // Ahora exportamos directamente la f
 
           </div>
 
-          {/* 5. BARRA DE CRÉDITOS */}
           <div className="credits-bar">
              Mostrar Créditos ⌄
           </div>
 
-          {/* 6. RELACIONADO */}
           <div style={{ padding: '60px 0', textAlign: 'center' }}>
              <h2 style={{ fontSize: '2rem', marginBottom: '30px' }}>Contenido relacionado</h2>
           </div>
