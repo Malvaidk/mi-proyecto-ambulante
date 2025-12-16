@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import withRole from "@/utils/withRole";
 import FormPelicula from "@/components/FormPelicula";
-// Asegúrate de importar Header si quieres mantener la navegación global, 
-// o déjalo sin Header para una vista admin más limpia.
-import Header from "../../../components/Header"; 
 
 function EditarDocumental() {
   const router = useRouter();
@@ -14,35 +11,31 @@ function EditarDocumental() {
 
   const [data, setData] = useState(null);
   const [initialForm, setInitialForm] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false); // Estado para feedback visual
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     const ok = confirm(
-      "¿ESTÁS SEGURO?\n\nEliminar este documental es irreversible. Se borrará de todas las giras y catálogos."
+      "¿ESTÁS SEGURO?\n\nEsta acción eliminará la película y todas sus relaciones (idiomas, temas, etc).\nNo se puede deshacer."
     );
   
     if (!ok) return;
-    
-    setIsDeleting(true);
-
+  
     try {
       const res = await fetch(`/api/deleteDocumental?id=${id}`, {
         method: "DELETE"
       });
     
-      const responseData = await res.json();
+      const data = await res.json();
     
       if (!res.ok) {
-        alert(responseData.message || "Error al eliminar");
-        setIsDeleting(false);
-        return;
+        throw new Error(data.message || "Error desconocido");
       }
     
-      alert("Documental eliminado correctamente.");
-      router.push("/dashboard"); 
+      alert("Eliminado con éxito.");
+      router.push("/dashboard");
+      
     } catch (error) {
-      console.error(error);
-      setIsDeleting(false);
+      alert("No se pudo eliminar: " + error.message);
     }
   };
   
@@ -53,30 +46,26 @@ function EditarDocumental() {
       fetch("/api/getData").then(r => r.json()),
       fetch(`/api/getDocumentalById?id=${id}`).then(r => r.json())
     ]).then(([catalogs, doc]) => {
-      // Si la API devuelve error o no encuentra el doc, doc.titulo será undefined
       if (!doc || doc.message) {
         console.error("Error cargando documental:", doc);
         return;
       }
 
-      console.log("Datos recibidos de la API:", doc); // MIRA LA CONSOLA DEL NAVEGADOR
+      console.log("Datos recibidos de la API:", doc); 
 
       setData(catalogs);
       setInitialForm({
-        // 1. Datos Directos (Nombres idénticos a la Base de Datos)
         titulo: doc.titulo,
         duracion: doc.duracion,
-        anioPub: doc.anioPub,       // Antes tenías: doc.anio_publicacion
+        anioPub: doc.anioPub,      
         sinopsis: doc.sinopsis,
-        imagen: doc.imagen,         // Antes tenías: doc.url_imagen
+        imagen: doc.imagen,         
         iniciativa: doc.iniciativa,
-        descarga: doc.descarga,     // Antes tenías: doc.url_descarga
-        idEdicion: doc.idEdicion,   // Antes tenías: doc.edicion_presentada
+        descarga: doc.descarga,     
+        idEdicion: doc.idEdicion,   
         
-        // 2. El director (Nombre que viene del JOIN en la API)
         director: doc.nombre_director || doc.director, 
 
-        // 3. Arrays de IDs para las listas (Chips)
         idiomasIds: doc.idiomasIds || [],
         tematicasIds: doc.tematicasIds || [],
         premiosIds: doc.premiosIds || []
@@ -95,7 +84,6 @@ function EditarDocumental() {
       const resData = await res.json();
       if(res.ok) {
         alert("¡Documental actualizado con éxito!");
-        // Opcional: router.push('/dashboard');
       } else {
         alert("Error: " + resData.message);
       }
@@ -112,12 +100,6 @@ function EditarDocumental() {
 
   return (
     <div style={{ backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
-      <Head>
-        <title>Editar: {initialForm.titulo} | Admin</title>
-      </Head>
-
-      <Header />
-
       <main className="admin-page-container">
         
         {/* CABECERA ADMIN */}

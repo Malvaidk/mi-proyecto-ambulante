@@ -22,9 +22,9 @@ export default function DocumentalPage() {
       try {
         setLoading(true);
         setDocumental(null); // Limpiamos la peli anterior para evitar mezclas visuales
-
+        console.log(id);
         const res = await fetch(`/api/getDocumentalById?id=${id}`);
-        
+      
         if (!res.ok) {
            throw new Error("Error al obtener datos");
         }

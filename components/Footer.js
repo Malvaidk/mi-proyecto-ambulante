@@ -60,7 +60,7 @@ export default function Footer() {
                <Facebook size={18} color="black" />
                <Youtube size={18} color="black" />
             </div>
-            <p className="address-text">Zacatecas 142-A, Roma Norte, Cuauhtémoc, 06700 Ciudad de México</p>
+            <p className="address-text">ESCOM IPN</p>
           </div>
         </div>
 

@@ -309,7 +309,7 @@ export default function GiraPage() {
               {movies?.length > 0 ? (
                 movies.slice(0, 5).map((movie, idx) => (
                   <Link 
-                    href={`/masInformacion/${movies.idPelicula || movies.id}`} 
+                    href={`/masInformacion/${movie.idPelicula || movie.id}`} 
                     key={movie.idPelicula || movie.id || idx}
                     className={`movie-card ${idx === 0 ? 'featured' : ''}`}
                   >

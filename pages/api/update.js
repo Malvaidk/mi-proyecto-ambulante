@@ -1,4 +1,4 @@
-import { getConnection } from "../../lib/connection"; // Verifica que esta ruta sea correcta
+import { getConnection } from "@/lib/connection"; // Verifica que esta ruta sea correcta
 
 // Función auxiliar para calcular diferencias
 function diff(actual = [], nuevo = []) {
