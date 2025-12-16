@@ -130,7 +130,7 @@ export default function GiraPage() {
       theme: `Gira ${year}`,
       fechas: "Fechas por confirmar | Recorrido nacional",
       descripcion: `Información sobre la Gira de Documentales realizada en el año ${year}. Un recorrido por lo mejor del cine documental.`,
-      poster: "/images/placeholder-poster.jpg", // Asegúrate de tener una imagen por defecto
+      poster: "/images/placeholder-poster.jpg",
       videoId: "zjgYRyROiCM",
       news1: { img: "/images/placeholder.jpg", text: `Evento destacado de ${year}` },
       news2: { img: "/images/placeholder.jpg", text: `Actividad especial de ${year}` }
@@ -141,10 +141,8 @@ export default function GiraPage() {
 
   const currentInfo = getEditionInfo(selectedYear);
 
-  // 3. Definición de funciones (API)
   const fetchDataByYear = async (year) => {
     try {
-      // Nota: Asegúrate de que tu API soporte el parámetro ?year=
       const res = await fetch(`/api/getDocumentals?year=${year}`);
       if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
       
@@ -155,7 +153,6 @@ export default function GiraPage() {
       
     } catch (error) {
       console.error("Error al obtener datos:", error);
-      // En caso de error, limpiamos las peliculas para que no se vean las del año anterior
       setMovies([]); 
     }
   };
@@ -163,16 +160,14 @@ export default function GiraPage() {
   const handleYearClick = async (year) => {
     console.log("Año seleccionado:", year);
     setSelectedYear(year);
-    setIsPlaying(false); // Reseteamos el video al cambiar de año
+    setIsPlaying(false); 
     await fetchDataByYear(year);
   };
   
-  // 4. useEffects
   useEffect(() => {
-    fetchDataByYear(2025); // Cargar 2025 al inicio
+    fetchDataByYear(2025);
   }, []);
 
-  // 5. Renderizado
   return (
     <div>
       <Head>
@@ -215,7 +210,6 @@ export default function GiraPage() {
         {/* --- SECCIÓN 3: EDICIÓN DINÁMICA (Aquí está el cambio principal) --- */}
         <section className="current-edition-section container">
           
-          {/* Título dinámico: 20a, 19a, etc. */}
           <h2 style={{ fontSize: '2rem', marginBottom: '10px' }}>
             {currentInfo.number}ª edición ({selectedYear})
           </h2>
@@ -277,7 +271,6 @@ export default function GiraPage() {
                         src={currentInfo.news1.img} 
                         alt="Noticia 1" 
                         style={{width:'100%', height:'100%', objectFit:'cover'}} 
-                        // Fallback simple si falla la imagen
                         onError={(e) => {e.target.src = 'https://via.placeholder.com/300x200?text=Ambulante'}}
                       />
                       <span style={{position:'absolute', bottom:5, left:5, background:'white', padding:'2px 5px', fontSize:'10px', fontWeight:'bold'}}>
@@ -314,11 +307,9 @@ export default function GiraPage() {
                     className={`movie-card ${idx === 0 ? 'featured' : ''}`}
                   >
                       <img 
-                        // CAMBIO: Manejo seguro de imagen (URL DB > local > placeholder)
                         src={movie.imagen || "https://via.placeholder.com/600x900?text=Sin+Imagen"} 
                         alt={movie.titulo} 
                         className="movie-bg"
-                        // Fallback si la URL existe pero está caída
                         onError={(e) => {
                           e.target.onerror = null; 
                           e.target.src = "https://via.placeholder.com/600x900?text=No+Disponible";

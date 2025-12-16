@@ -14,9 +14,6 @@ export default function HeroSection() {
         </Link>
       </div>
       
-      <div className="hero-slideshow-placeholder">
-        {/* Aquí iría tu carrusel de imágenes más adelante */}
-      </div>
     </section>
   );
 }

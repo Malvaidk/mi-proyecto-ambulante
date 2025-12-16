@@ -1,4 +1,3 @@
-# Archivo .env.local (No lo subas a GitHub)
 DB_HOST=yamabiko.proxy.rlwy.net
 DB_PORT=40886
 DB_NAME=ambulante

@@ -14,14 +14,12 @@ export default function DocumentalPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Si no hay ID todavía (el router está cargando), no hacemos nada
     if (!id) return;
 
-    // Definimos la función de carga dentro del efecto
     const fetchData = async () => {
       try {
         setLoading(true);
-        setDocumental(null); // Limpiamos la peli anterior para evitar mezclas visuales
+        setDocumental(null);
         console.log(id);
         const res = await fetch(`/api/getDocumentalById?id=${id}`);
       
@@ -36,15 +34,13 @@ export default function DocumentalPage() {
         console.error("Error fetching documental:", err);
         setDocumental(null);
       } finally {
-        // Esto se ejecuta siempre, haya éxito o error
         setLoading(false);
       }
     };
 
-    // Ejecutamos la función
     fetchData();
 
-  }, [id]); // Se ejecuta cada vez que cambia el ID
+  }, [id]);
 
   if (loading) return (
     <div style={{height: '100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>
@@ -52,7 +48,6 @@ export default function DocumentalPage() {
     </div>
   );
   
-  // Verificamos si documental es null antes de intentar renderizarlo
   if (!documental) return (
     <div style={{height: '100vh', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
       <h1>Documental no encontrado</h1>

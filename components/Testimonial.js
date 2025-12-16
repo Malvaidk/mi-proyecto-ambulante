@@ -2,7 +2,6 @@ import { ArrowLeft, ArrowRight, User } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Testimonial() {
-  // 1. Datos de los testimonios
   const testimonials = [
     {
       id: 1,
@@ -36,10 +35,8 @@ export default function Testimonial() {
     }
   ];
 
-  // 2. Estado para saber cuál testimonio mostrar
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // 3. Funciones de navegación
   const nextTestimonial = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
   };
@@ -54,7 +51,6 @@ export default function Testimonial() {
     setCurrentIndex(index);
   };
 
-  // Datos actuales
   const current = testimonials[currentIndex];
 
   return (
@@ -89,7 +85,6 @@ export default function Testimonial() {
             
             <div className="author-info">
               <div className="author-avatar">
-                {/* Puedes cambiar esto por <img src="..." /> si tienes fotos */}
                 <User size={40} color="#999" /> 
               </div>
               <div className="author-details">

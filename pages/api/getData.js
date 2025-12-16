@@ -1,7 +1,6 @@
 import { getConnection } from "../../lib/connection";
 
 export default async function handler(req, res) {
-  // Objeto base por si falla algo, que no rompa la página
   const result = {
     idiomas: [],
     tematicas: [],

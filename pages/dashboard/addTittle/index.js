@@ -13,12 +13,11 @@ export default function AgregarPelicula() {
     imagen: "",
     iniciativa: "",
     descarga: "",
-    // Ahora estos son textos simples
     numEdicion: "", 
     directorNombre: "",
-    idiomas: "",   // Ej: "Español, Inglés"
-    tematicas: "", // Ej: "Social, Música"
-    premios: ""    // Ej: "Morelia, Cannes"
+    idiomas: "",   
+    tematicas: "", 
+    premios: ""   
   });
 
   const handleChange = (field, value) => {

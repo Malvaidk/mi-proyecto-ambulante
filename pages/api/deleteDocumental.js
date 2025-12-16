@@ -19,7 +19,6 @@ export default async function handler(req, res) {
       [id]
     );
 
-    // 3. Verificar si algo se borró realmente
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "No se encontró esa película o ya fue eliminada." });
     }

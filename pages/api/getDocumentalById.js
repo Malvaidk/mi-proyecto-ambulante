@@ -20,12 +20,12 @@ export default async function handler(req, res) {
     
     const doc = rows[0];
 
-    // 2. Traer listas de IDs relacionados
+    //Traer listas de IDs relacionados
     const [idiomas] = await conn.execute("SELECT idIdioma FROM relpeliidm WHERE idPelicula = ?", [id]);
     const [tematicas] = await conn.execute("SELECT idTematica FROM relpelitem WHERE idPelicula = ?", [id]);
     const [premios] = await conn.execute("SELECT idFesPrem FROM relpeliprem WHERE idPelicula = ?", [id]);
 
-    // 3. Respuesta combinada
+    //Respuesta combinada
     res.json({
       ...doc,
       // Usamos el nombre del director para el formulario, no la CURP

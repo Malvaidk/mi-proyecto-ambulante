@@ -1,4 +1,4 @@
-import { getConnection } from "@/lib/connection"; // Verifica que esta ruta sea correcta
+import { getConnection } from "@/lib/connectionAdmin";
 
 // Función auxiliar para calcular diferencias
 function diff(actual = [], nuevo = []) {
@@ -19,12 +19,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Método no permitido' });
   }
 
-  let conn; // Declaramos la conexión aquí para poder usarla en el finally
+  let conn;
 
   try {
     const pool = await getConnection();
     
-    // PASO CRÍTICO: Pedimos una conexión dedicada del pool para la transacción
     conn = await pool.getConnection();
 
     const { id } = req.query;
@@ -36,12 +35,8 @@ export default async function handler(req, res) {
 
     console.log("📝 Iniciando actualización para ID:", id);
 
-    // Iniciamos la transacción en la conexión dedicada
     await conn.beginTransaction();
 
-    /* ---------------------------------------------------------
-       1. BUSCAR CURP DEL DIRECTOR
-       --------------------------------------------------------- */
     const [rowsDirector] = await conn.execute(
       `SELECT d.curp 
        FROM directores d
@@ -51,8 +46,8 @@ export default async function handler(req, res) {
     );
 
     if (rowsDirector.length === 0) {
-      await conn.rollback(); // Cancelamos si no existe
-      conn.release(); // Liberamos la conexión
+      await conn.rollback();
+      conn.release();
       return res.status(400).json({ 
         message: `No se encontró un director con el nombre: "${director}". Revisa la ortografía.` 
       });
@@ -60,9 +55,7 @@ export default async function handler(req, res) {
 
     const curpDirector = rowsDirector[0].curp;
 
-    /* ---------------------------------------------------------
-       2. ACTUALIZAR PELÍCULA
-       --------------------------------------------------------- */
+
     await conn.execute(
       `UPDATE peliculas
        SET titulo=?, duracion=?, anioPub=?, sinopsis=?, imagen=?, iniciativa=?,
@@ -74,9 +67,7 @@ export default async function handler(req, res) {
       ]
     );
 
-    /* ---------------------------------------------------------
-       3. ACTUALIZAR RELACIONES (Idiomas, Temáticas, Premios)
-       --------------------------------------------------------- */
+
     
     // --- IDIOMAS ---
     const [rowsIdiomas] = await conn.execute(`SELECT idIdioma FROM relpeliidm WHERE idPelicula=?`, [id]);
@@ -99,19 +90,17 @@ export default async function handler(req, res) {
     for (const p of dPrem.eliminar) await conn.execute(`DELETE FROM relpeliprem WHERE idPelicula=? AND idFesPrem=?`, [id, p]);
     for (const p of dPrem.agregar) await conn.execute(`INSERT INTO relpeliprem (idPelicula, idFesPrem) VALUES (?,?)`, [id, p]);
 
-    // CONFIRMAR CAMBIOS
     await conn.commit();
     res.status(200).json({ message: "Documental actualizado correctamente" });
 
   } catch (error) {
     console.error("❌ Error CRÍTICO en update.js:", error);
-    if (conn) await conn.rollback(); // Deshacer cambios si hubo error
+    if (conn) await conn.rollback();
     
     res.status(500).json({ 
       message: "Error interno del servidor: " + error.message 
     });
   } finally {
-    // IMPORTANTE: Siempre liberar la conexión al pool
     if (conn) conn.release();
   }
 }

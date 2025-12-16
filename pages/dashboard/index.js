@@ -15,7 +15,7 @@ function Dashboard() {
   const [years, setYears] = useState([]); 
   
   // --- NUEVOS ESTADOS PARA REPORTES ---
-  const [reportType, setReportType] = useState('tematica'); // 'edicion', 'director', 'tematica'
+  const [reportType, setReportType] = useState('tematica'); 
   const [reportValue, setReportValue] = useState('');
   const [reportData, setReportData] = useState([]);
   const [loadingReport, setLoadingReport] = useState(false);
@@ -50,7 +50,6 @@ function Dashboard() {
   };
   
   useEffect(() => {
-    // Carga inicial
     fetch(`/api/getDocumentals`) 
       .then(res => res.json())
       .then(data => {
@@ -66,10 +65,9 @@ function Dashboard() {
     if (!reportValue) return alert("Por favor ingresa un valor para buscar.");
 
     setLoadingReport(true);
-    setReportData([]); // Limpiar tabla previa
+    setReportData([]);
 
     try {
-      // Llamamos a la API que creamos en el paso anterior (api/reports.js)
       const res = await fetch(`/api/reports?tipo=${reportType}&valor=${reportValue}`);
       const data = await res.json();
 
@@ -174,8 +172,6 @@ function Dashboard() {
             )}
           </div>
         </section>
-        {/* --- FIN SECCIÓN REPORTES --- */}
-
 
         {/* Ediciones anteriores */}
         <section className={styles.editionsList}>
