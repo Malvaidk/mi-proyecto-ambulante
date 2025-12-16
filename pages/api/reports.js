@@ -1,4 +1,4 @@
-import { getConnection } from "../../lib/connectionAdmin"; 
+import { getConnection } from "@/lib/connectionAdmin"; 
 export default async function handler(req, res) {
   const { tipo, valor } = req.query;
 
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     console.error("❌ Error en API Reports:", error);
     
     if (error.code === 'ER_SP_DOES_NOT_EXIST') {
-      return res.status(500).json({ 
+      return res.status(500).json({   
         message: "Error crítico: Los procedimientos almacenados no existen en la Base de Datos. Ejecuta el script SQL en Workbench." 
       });
     }

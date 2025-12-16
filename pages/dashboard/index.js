@@ -59,7 +59,6 @@ function Dashboard() {
       .catch(err => console.error("Fetch error:", err));
   }, []);
 
-  // --- LÓGICA PARA GENERAR REPORTES ---
   const handleGenerateReport = async (e) => {
     e.preventDefault();
     if (!reportValue) return alert("Por favor ingresa un valor para buscar.");
@@ -68,18 +67,35 @@ function Dashboard() {
     setReportData([]);
 
     try {
-      const res = await fetch(`/api/reports?tipo=${reportType}&valor=${reportValue}`);
-      const data = await res.json();
+      const typeParam = encodeURIComponent(reportType);
+      const valueParam = encodeURIComponent(reportValue);
+      
+      console.log(`📡 Buscando: /api/reports?tipo=${typeParam}&valor=${valueParam}`);
+      
+      const res = await fetch(`/api/reports?tipo=${typeParam}&valor=${valueParam}`);
 
-      if (res.ok) {
-        if (data.length === 0) alert("No se encontraron resultados.");
-        setReportData(data);
-      } else {
-        alert("Error: " + data.message);
+      const responseText = await res.text();
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (jsonError) {
+        throw new Error(`El servidor no devolvió un JSON válido. Respuesta: ${responseText.substring(0, 100)}...`);
       }
+
+      if (!res.ok) {
+        throw new Error(data.message || `Error del servidor (${res.status})`);
+      }
+
+      if (data.length === 0) {
+        alert("No se encontraron resultados.");
+      } else {
+        setReportData(data);
+      }
+
     } catch (error) {
-      console.error("Error reporte:", error);
-      alert("Error de conexión al generar reporte.");
+      console.error("❌ Error reporte:", error);
+      alert(`Fallo: ${error.message}`);
     } finally {
       setLoadingReport(false);
     }
