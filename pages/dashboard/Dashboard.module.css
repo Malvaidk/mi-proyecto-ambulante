@@ -244,3 +244,93 @@
     background: #111;
     color: white;
   }
+
+  /* --- ESTILOS PARA LA SECCIÓN DE REPORTES --- */
+.reportSection {
+  margin-bottom: 50px;
+}
+
+.reportCard {
+  background: white;
+  border: 1px solid #eee;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.reportForm {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #555;
+  text-transform: uppercase;
+}
+
+.reportSelect,
+.reportInput {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  min-width: 250px;
+}
+
+.reportBtn {
+  padding: 12px 25px;
+  background-color: var(--color-black, #000);
+  color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: opacity 0.2s;
+}
+
+.reportBtn:hover {
+  opacity: 0.8;
+}
+
+/* Tabla de Resultados */
+.tableWrapper {
+  overflow-x: auto;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.dataTable th {
+  text-align: left;
+  background-color: #f9f9f9;
+  padding: 12px;
+  font-weight: bold;
+  border-bottom: 2px solid #ddd;
+  color: #333;
+}
+
+.dataTable td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  color: #555;
+}
+
+.dataTable tr:hover td {
+  background-color: #fafafa;
+}

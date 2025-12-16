@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       result.tematicas = rows;
     } catch (e) { console.error("⚠️ Error Temáticas:", e.message); }
 
-    // 3. PREMIOS (Corrección: tabla 'fespremios')
+    // 3. PREMIOS 
     try {
       const [rows] = await conn.execute("SELECT * FROM fespremios ORDER BY nombre ASC");
       result.premios = rows;

@@ -1,22 +1,27 @@
 "use client"
 import { useRouter } from "next/router";
 import withRole from '@/utils/withRole';
-// import Head from 'next/head'; // Opcional si lo usas
 import Link from 'next/link';
-// import Header from '@/components/Header'; // Descomenta si tienes el componente
 import Footer from '@/components/Footer';
 import { useEffect, useState } from "react";
 
-// Importamos los estilos
 import styles from './Dashboard.module.css';
 
-function Dashboard() { // Cambié a mayúscula "Dashboard" (convención React)
+function Dashboard() { 
   const router = useRouter();
+  
+  // Estados de Películas (Existentes)
   const [movies, setMovies] = useState([]);
-  const [years, setYears] = useState([]); // Corregido let -> const
+  const [years, setYears] = useState([]); 
+  
+  // --- NUEVOS ESTADOS PARA REPORTES ---
+  const [reportType, setReportType] = useState('tematica'); // 'edicion', 'director', 'tematica'
+  const [reportValue, setReportValue] = useState('');
+  const [reportData, setReportData] = useState([]);
+  const [loadingReport, setLoadingReport] = useState(false);
 
   const handleAddtittle = () => {
-     router.push("/dashboard/addTittle"); // Asegúrate que esta ruta es correcta según tus carpetas
+     router.push("/dashboard/addTittle"); 
   }
 
   const handleYearClick = async (year) => {
@@ -31,14 +36,10 @@ function Dashboard() { // Cambié a mayúscula "Dashboard" (convención React)
     
       if(!data.movies || data.movies.length === 0){
         setMovies([]);
-        // setYears([...years]); // No es necesario resetear years aquí si ya existen
         return;
       }
       
-      console.log("Datos recibidos:", data);
       setMovies(data.movies);
-      
-      // Solo actualizamos los años si están vacíos al principio
       if(years.length === 0 && data.availableYears){
         setYears(data.availableYears);
       }
@@ -49,7 +50,7 @@ function Dashboard() { // Cambié a mayúscula "Dashboard" (convención React)
   };
   
   useEffect(() => {
-    // Carga inicial (quizás quieras pasarle el año actual o dejarlo vacío para traer todo)
+    // Carga inicial
     fetch(`/api/getDocumentals`) 
       .then(res => res.json())
       .then(data => {
@@ -58,12 +59,36 @@ function Dashboard() { // Cambié a mayúscula "Dashboard" (convención React)
       })
       .catch(err => console.error("Fetch error:", err));
   }, []);
-  
+
+  // --- LÓGICA PARA GENERAR REPORTES ---
+  const handleGenerateReport = async (e) => {
+    e.preventDefault();
+    if (!reportValue) return alert("Por favor ingresa un valor para buscar.");
+
+    setLoadingReport(true);
+    setReportData([]); // Limpiar tabla previa
+
+    try {
+      // Llamamos a la API que creamos en el paso anterior (api/reports.js)
+      const res = await fetch(`/api/reports?tipo=${reportType}&valor=${reportValue}`);
+      const data = await res.json();
+
+      if (res.ok) {
+        if (data.length === 0) alert("No se encontraron resultados.");
+        setReportData(data);
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error reporte:", error);
+      alert("Error de conexión al generar reporte.");
+    } finally {
+      setLoadingReport(false);
+    }
+  };
 
   return (
     <div className={styles.pageWrapper}>
-      {/* <Header />  <-- Descomenta si quieres que se vea el header */}
-
       <main className={styles.mainContent}>
         
         {/* Breadcrumb */}
@@ -79,9 +104,82 @@ function Dashboard() { // Cambié a mayúscula "Dashboard" (convención React)
           <h1 className={styles.mainTitle}>Gira de Documentales</h1>
         </section>
 
-        {/* Ediciones anteriores (Botones de años) */}
+        {/* --- NUEVA SECCIÓN: REPORTES AVANZADOS (Stored Procedures) --- */}
+        <section className={styles.reportSection}>
+          <h3 className={styles.sectionTitle}>Reportes y Estadísticas</h3>
+          
+          <div className={styles.reportCard}>
+            <form onSubmit={handleGenerateReport} className={styles.reportForm}>
+              
+              <div className={styles.formGroup}>
+                <label>Tipo de Reporte:</label>
+                <select 
+                  value={reportType} 
+                  onChange={(e) => {
+                    setReportType(e.target.value);
+                    setReportData([]); 
+                    setReportValue('');
+                  }}
+                  className={styles.reportSelect}
+                >
+                  <option value="tematica">Conteo por Temática</option>
+                  <option value="edicion">Películas por Num. Edición</option>
+                  <option value="director">Duración Total Director (CURP)</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup} style={{flex: 1}}>
+                <label>
+                  {reportType === 'tematica' && "Nombre de la Temática (ej. Justicia):"}
+                  {reportType === 'edicion' && "Número de Edición (ej. 14, 18):"}
+                  {reportType === 'director' && "CURP del Director:"}
+                </label>
+                <input 
+                  type={reportType === 'edicion' ? "number" : "text"}
+                  className={styles.reportInput}
+                  value={reportValue}
+                  onChange={(e) => setReportValue(e.target.value)}
+                  placeholder={reportType === 'director' ? 'Ej: MOOV98...' : 'Ingresa valor...'}
+                />
+              </div>
+
+              <button type="submit" className={styles.reportBtn} disabled={loadingReport}>
+                {loadingReport ? "Generando..." : "Generar Reporte"}
+              </button>
+            </form>
+
+            {/* TABLA DE RESULTADOS DEL REPORTE */}
+            {reportData.length > 0 && (
+              <div className={styles.tableWrapper}>
+                <table className={styles.dataTable}>
+                  <thead>
+                    <tr>
+                      {/* Generamos encabezados dinámicos basados en los datos */}
+                      {Object.keys(reportData[0]).map((key) => (
+                        <th key={key}>{key.replace(/_/g, ' ').toUpperCase()}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.map((row, idx) => (
+                      <tr key={idx}>
+                        {Object.values(row).map((val, i) => (
+                          <td key={i}>{val}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </section>
+        {/* --- FIN SECCIÓN REPORTES --- */}
+
+
+        {/* Ediciones anteriores */}
         <section className={styles.editionsList}>
-          <h3 className={styles.sectionTitle}>Filtrar por Edición</h3>
+          <h3 className={styles.sectionTitle}>Filtrar por Edición (Año)</h3>
           <div className={styles.yearsGrid}>
             {years.length > 0 ? years.map((year) => (
               <div
@@ -96,13 +194,13 @@ function Dashboard() { // Cambié a mayúscula "Dashboard" (convención React)
           </div>
         </section>
 
-        {/* Histórico de películas (Grid) */}
+        {/* Histórico de películas */}
         <section className={styles.moviesHistory}>
           <h3 className={styles.sectionTitle}>Documentales Programados</h3>
           
           <div className={styles.moviesGrid}>
             
-            {/* Tarjeta Especial: Agregar Nuevo */}
+            {/* Tarjeta Agregar Nuevo */}
             <div 
               className={`${styles.movieCard} ${styles.addCard}`} 
               onClick={handleAddtittle}
@@ -116,7 +214,6 @@ function Dashboard() { // Cambié a mayúscula "Dashboard" (convención React)
               <div key={idx} className={styles.movieCard}>
                 <Link href={`/dashboard/documentales/${movie.idPelicula}`} style={{ textDecoration: 'none', color: 'inherit', height: '100%', display: 'flex', flexDirection: 'column' }}>
                   
-                  {/* Poster (Si tienes URL de imagen úsala, si no, placeholder) */}
                   {movie.imagen ? (
                     <div 
                         className={styles.posterPlaceholder} 
