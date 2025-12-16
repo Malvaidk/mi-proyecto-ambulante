@@ -1,0 +1,8 @@
+# Archivo .env.local (No lo subas a GitHub)
+DB_HOST=yamabiko.proxy.rlwy.net
+DB_PORT=40886
+DB_NAME=ambulante
+DB_USER_READER=root
+DB_PASSWORD_READER=AffAcipLEKKoQkVphRiuwEnDPTOhmPDh
+DB_USER_ADMIN=root
+DB_PASSWORD_ADMIN=AffAcipLEKKoQkVphRiuwEnDPTOhmPDh
